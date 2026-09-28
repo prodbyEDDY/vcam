@@ -83,6 +83,13 @@ export class CameraSession {
     this.events.busy(true);this.events.note('Проверяем доступные режимы камеры…');
     const modes=await probeModes(track);const info={...await inspectCamera(track),modes};this.setInfo(info);this.send({type:'info',info});this.events.busy(false);this.events.note('');
   }
+  private async tuneSender(){
+    const sender=this.peer?.getSenders().find(s=>s.track?.kind==='video');if(!sender?.track)return;
+    try{const s=sender.track.getSettings(),p=sender.getParameters();if(!p.encodings?.length)return;
+      p.encodings[0].maxBitrate=Math.min(50000000,Math.max(2000000,(s.width||1280)*(s.height||720)*(s.frameRate||30)*0.14));
+      p.encodings[0].maxFramerate=s.frameRate||30;p.degradationPreference='maintain-resolution';await sender.setParameters(p);
+    }catch{/* Safari may not expose encoder controls; negotiated defaults remain valid. */}
+  }
   async connectPhone(){
     if(!this.pair){this.events.error('Открой VCam на компьютере и отсканируй новый QR-код.');return}
     this.stop();this.phone=true;this.events.error('');this.events.state('opening');this.events.note('Открываем камеру…');const epoch=this.epoch;
@@ -97,7 +104,7 @@ export class CameraSession {
       this.events.state('connecting');this.events.note('Соединяемся с компьютером…');
       if(!await this.poll(p,r,'phone',epoch))return;
       await p.setLocalDescription(await p.createAnswer());await gather(p);if(this.epoch!==epoch)return;
-      await this.api(this.path(r,'phone'),{method:'POST',headers:this.auth(r,'phone'),body:JSON.stringify(p.localDescription)});this.timeout(p,epoch);
+      await this.api(this.path(r,'phone'),{method:'POST',headers:this.auth(r,'phone'),body:JSON.stringify(p.localDescription)});await this.tuneSender();this.timeout(p,epoch);
     }catch(e){if(this.epoch===epoch)this.fail(e)}
   }
   private async apply(c:any){
@@ -107,9 +114,9 @@ export class CameraSession {
       let media:MediaStream;let failure:any;
       try{media=await navigator.mediaDevices.getUserMedia({audio:false,video:c.name==='device'?{deviceId:{exact:c.value},width:{ideal:1920},height:{ideal:1080}}:{facingMode:{exact:previous.facingMode==='user'?'environment':'user'},width:{ideal:1920},height:{ideal:1080}}})}
       catch(e){failure=e;media=await navigator.mediaDevices.getUserMedia({audio:false,video:{deviceId:{exact:previous.deviceId}}})}
-      this.stream=media;const next=media.getVideoTracks()[0];this.events.stream(media);await this.peer?.getSenders().find(s=>s.track?.kind==='video')?.replaceTrack(next);this.bind(next);await this.scan(next);if(failure)throw failure;return;
+      this.stream=media;const next=media.getVideoTracks()[0];this.events.stream(media);await this.peer?.getSenders().find(s=>s.track?.kind==='video')?.replaceTrack(next);this.bind(next);await this.scan(next);await this.tuneSender();if(failure)throw failure;return;
     }
-    if(c.name==='mode')await setMode(track,Number(c.value));
+    if(c.name==='mode'){await setMode(track,Number(c.value));await this.tuneSender()}
     else if(c.name==='pause'){track.enabled=!c.value;this.events.state(c.value?'paused':'live');this.send({type:'muted',muted:!!c.value});return}
     else if(c.name==='constraint'){
       const allowed=['zoom','torch','exposureCompensation','focusDistance','focusMode','exposureMode','whiteBalanceMode','colorTemperature'];

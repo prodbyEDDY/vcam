@@ -2,7 +2,7 @@ const {app,BrowserWindow,ipcMain,shell,session}=require('electron');
 const {spawn,execFile}=require('node:child_process');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
-const SITE='https://vcam-eddy.prodbyeddy.chatgpt.site';
+const SITE=!app.isPackaged&&process.env.VCAM_TEST_SITE==='http://127.0.0.1:5173'?process.env.VCAM_TEST_SITE:'https://vcam-eddy.prodbyeddy.chatgpt.site';
 let win,bridge,consumer=false,bridgeError='',inFlight=false;
 const ui=path.join(__dirname,'ui','index.html');
 const nativePath=()=>app.isPackaged?path.join(process.resourcesPath,'native'):path.join(__dirname,'..','native','bin');
@@ -41,7 +41,7 @@ if(!app.requestSingleInstanceLock()){app.quit()}else{
    const installed=await new Promise(resolve=>execFile('reg.exe',['query','HKLM\\SOFTWARE\\Classes\\CLSID\\{ECDF41C5-92AD-4999-8666-912BD3E70010}\\InprocServer32'],{windowsHide:true},e=>resolve(!e)));
    return {installed,consumer,error:bridgeError};
   });
-  win=new BrowserWindow({width:1320,height:960,minWidth:800,minHeight:700,backgroundColor:'#111113',title:'VCam',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,backgroundThrottling:false}});
+  win=new BrowserWindow({show:!process.env.VCAM_SMOKE_TEST,width:1320,height:960,minWidth:800,minHeight:700,backgroundColor:'#111113',title:'VCam',icon:path.join(__dirname,'icon.ico'),autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),additionalArguments:[`--vcam-site=${SITE}`],contextIsolation:true,nodeIntegration:false,sandbox:true,backgroundThrottling:false}});
   win.webContents.setWindowOpenHandler(({url})=>{if(url.startsWith('https://github.com/prodbyEDDY/vcam'))void shell.openExternal(url);return {action:'deny'}});
   win.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith(pathToFileURL(ui).href))e.preventDefault()});
   win.loadFile(ui);win.on('closed',()=>{win=null});

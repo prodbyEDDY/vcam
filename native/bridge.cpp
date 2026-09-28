@@ -27,6 +27,9 @@ int main(int argc,char** argv){
   while(readExact(&h,sizeof(h))){
     if(h.magic!=0x4d414356 || h.width<4 || h.height<4 || h.width>3840 || h.height>3840 || (uint64_t)h.width*h.height>3840ULL*2160 || h.length!=(uint64_t)h.width*h.height*4){fprintf(stderr,"Invalid frame header\n");return 4;}
     pixels.resize(h.length);if(!readExact(pixels.data(),pixels.size()))return 5;
+    // Canvas pixels are top-down; DirectShow RGB DIBs have positive height (bottom-up).
+    const size_t row=(size_t)h.width*4;std::vector<uint8_t> scratch(row);
+    for(uint32_t y=0;y<h.height/2;y++){uint8_t* a=pixels.data()+y*row;uint8_t* b=pixels.data()+(h.height-1-y)*row;memcpy(scratch.data(),a,row);memcpy(a,b,row);memcpy(b,scratch.data(),row);}
     bool consumer=sender.SendIsReady();
     if(consumer)consumer=sender.Send(h.width,h.height,h.width,h.length,SharedImageMemory::FORMAT_UINT8,SharedImageMemory::RESIZEMODE_LINEAR,SharedImageMemory::MIRRORMODE_DISABLED,500,pixels.data())==SharedImageMemory::SENDRES_OK;
     ULONGLONG now=GetTickCount64();if(now-last>1000){printf("{\"consumer\":%s}\n",consumer?"true":"false");last=now;}

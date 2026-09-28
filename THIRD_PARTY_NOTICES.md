@@ -7,3 +7,5 @@ The filter and its source files are distributed under the MIT license included i
 VCam modifications: distinct CLSIDs and shared-memory names (no collision with UnityCapture), friendly name VCam, black inactive output, synchronization handle permissions, mapped-view cleanup, native pipe sender, validation, build configuration and packaging.
 
 Electron, Chromium, React, Radix, Lucide, QRCode and the remaining npm dependencies retain their respective licenses in the application distribution and dependency packages. Electron includes LICENSE.electron.txt and LICENSES.chromium.html.
+
+Inter Variable is bundled under the SIL Open Font License 1.1. Its license is in web/public/fonts/LICENSE.txt; source: https://github.com/rsms/inter.

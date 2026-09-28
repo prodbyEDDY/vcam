@@ -1,4 +1,6 @@
+!include "x64.nsh"
 !macro customInstall
+  ${DisableX64FSRedirection}
   nsExec::ExecToStack '"$SYSDIR\regsvr32.exe" /s "$INSTDIR\resources\native\VCamCamera64.dll"'
   Pop $0
   Pop $1
@@ -9,12 +11,15 @@
   nsExec::ExecToStack '"$WINDIR\SysWOW64\regsvr32.exe" /s "$INSTDIR\resources\native\VCamCamera32.dll"'
   Pop $0
   Pop $1
+  ${EnableX64FSRedirection}
 !macroend
 !macro customUnInstall
+  ${DisableX64FSRedirection}
   nsExec::ExecToStack '"$SYSDIR\regsvr32.exe" /s /u "$INSTDIR\resources\native\VCamCamera64.dll"'
   Pop $0
   Pop $1
   nsExec::ExecToStack '"$WINDIR\SysWOW64\regsvr32.exe" /s /u "$INSTDIR\resources\native\VCamCamera32.dll"'
   Pop $0
   Pop $1
+  ${EnableX64FSRedirection}
 !macroend

@@ -15,11 +15,12 @@
   "devDependencies": { "electron": "^41.0.0", "electron-builder": "^26.0.12" },
   "build": {
     "appId": "dev.prodbyeddy.vcam",
+    "beforePack": "scripts/before-pack.cjs",
     "productName": "VCam",
     "directories": { "output": "release" },
     "files": ["desktop/**/*", "package.json"],
     "extraResources": [{ "from": "native/bin", "to": "native", "filter": ["*.dll", "*.exe"] }, { "from": "THIRD_PARTY_NOTICES.md", "to": "THIRD_PARTY_NOTICES.md" }],
-    "win": { "target": ["nsis"], "artifactName": "VCam-Setup-${version}-${arch}.${ext}", "signAndEditExecutable": false },
+    "win": { "target": ["nsis"], "artifactName": "VCam-Setup-${version}-${arch}.${ext}", "icon": "desktop/icon.ico", "signExecutable": false },
     "nsis": { "oneClick": false, "perMachine": true, "allowToChangeInstallationDirectory": true, "include": "desktop/installer.nsh", "deleteAppDataOnUninstall": false }
   }
 }
