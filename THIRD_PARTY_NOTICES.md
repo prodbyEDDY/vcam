@@ -13,3 +13,6 @@ Inter Variable is bundled under the SIL Open Font License 1.1. Its license is in
 Browser/application brand SVGs in web/public/brands are from Simple Icons (https://github.com/simple-icons/simple-icons, CC0). Brand names and marks remain property of their respective owners; their appearance identifies platforms and compatible tools, not sponsorship or certification. The Windows mark is a simple four-pane identifier.
 
 VCam mockups and the violet V icon were generated with OpenAI ImageGen using the project owner's Respo mockups as visual references. Prompt and asset provenance: docs/IMAGEGEN.md. Mockups illustrate the product; they are not compatibility or performance measurements.
+
+- jsQR (Apache-2.0), https://github.com/cozmo/jsQR — browser QR decoding.
+- electron-updater (MIT), https://github.com/electron-userland/electron-builder — Windows update delivery.

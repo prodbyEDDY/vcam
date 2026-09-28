@@ -12,6 +12,8 @@
   Pop $0
   Pop $1
   ${EnableX64FSRedirection}
+  ; Refresh shortcut icons without rebuilding the user icon cache.
+  System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 !macroend
 !macro customUnInstall
   ${DisableX64FSRedirection}

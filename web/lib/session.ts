@@ -2,7 +2,7 @@ import { CameraInfo, gather, inspectCamera, probeModes, setMode, sleep } from '.
 export type SessionState = 'idle'|'opening'|'pairing'|'connecting'|'live'|'paused'|'error';
 export type Room={id:string;hostToken?:string;phoneToken?:string;pairToken?:string;code?:string;expires?:number};
 export const EMPTY_INFO:CameraInfo={settings:{},capabilities:{},devices:[],modes:[]};
-declare global { interface Window { vcam?: {site:string;version:string;api:(path:string,options:any)=>Promise<any>;frame:(w:number,h:number,data:ArrayBuffer)=>Promise<boolean>;status:()=>Promise<{installed:boolean;consumer:boolean;error?:string}>} } }
+declare global { interface Window { vcam?: {site:string;version:string;api:(path:string,options:any)=>Promise<any>;frame:(w:number,h:number,data:ArrayBuffer)=>Promise<boolean>;status:()=>Promise<{installed:boolean;consumer:boolean;error?:string;update?:string}>} } }
 export const friendly=(e:any)=>e?.name==='NotAllowedError'?'Разреши доступ к камере в настройках Safari.':e?.name==='OverconstrainedError'?'Этот режим недоступен для выбранной камеры.':e?.name==='NotReadableError'?'Камера занята другим приложением.':e?.message||'Не удалось подключиться. Попробуй ещё раз.';
 type Events={state:(s:SessionState)=>void;note:(s:string)=>void;error:(s:string)=>void;info:(i:CameraInfo)=>void;link:(s:string)=>void;code?:(s:string)=>void;stream:(s:MediaStream|null)=>void;busy:(b:boolean)=>void;orientation:(a:number)=>void};
 export class CameraSession {

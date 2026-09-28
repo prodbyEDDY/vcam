@@ -2,8 +2,10 @@
 const {app,BrowserWindow}=require('electron');const fs=require('node:fs');const path=require('node:path');
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const wait=async(fn,label)=>{for(let i=0;i<100;i++){if(await fn())return;await delay(100)}throw Error('Timeout: '+label)};
+app.setPath('userData',path.join(__dirname,'../.cache/test-profiles/ui-smoke'));
+app.commandLine.appendSwitch('use-fake-device-for-media-stream');app.commandLine.appendSwitch('use-fake-ui-for-media-stream');
 app.whenReady().then(async()=>{let w;try{
- w=new BrowserWindow({show:false,width:1280,height:900,webPreferences:{backgroundThrottling:false}});
+ w=new BrowserWindow({show:false,width:1280,height:900,webPreferences:{backgroundThrottling:false,offscreen:true}});
  const js=s=>w.webContents.executeJavaScript(s);await w.loadURL(process.env.VCAM_QA_SITE||'http://localhost:5173');
  await wait(()=>js(`!!document.querySelector('.landing')`),'landing');await delay(800);
  if(await js(`!!document.querySelector('.qr-frame')`))throw Error('Website must not create QR');
@@ -11,7 +13,7 @@ app.whenReady().then(async()=>{let w;try{
  await js(`document.querySelector('.share-button').click()`);await wait(()=>js(`!!document.querySelector('.support-dialog')`),'star dialog before share');
  if(!await js(`document.querySelector('.support-dialog').textContent.includes('по желанию')`))throw Error('Star must be optional');
  await js(`navigator.share=async data=>{window.shared=data};Array.from(document.querySelectorAll('.support-dialog button')).find(b=>b.textContent.includes('Поделиться ссылкой')).click()`);
- await wait(()=>js(`window.shared?.url.includes('/releases/tag/v0.2.0')`),'share download link');
+ await wait(()=>js(`window.shared?.url.includes('/releases/tag/v0.2.1')`),'share download link');
  await wait(()=>js(`!document.querySelector('.support-dialog')`),'share dialog closed');
  await js(`document.querySelector('.help-link').click()`);await wait(()=>js(`document.querySelectorAll('.help-step').length===3`),'help cards');
  await js(`document.querySelector('[aria-label="Закрыть инструкцию"]').click()`);await delay(250);
@@ -21,6 +23,7 @@ app.whenReady().then(async()=>{let w;try{
  await w.loadURL(new URL('/connect',process.env.VCAM_QA_SITE||'http://localhost:5173').href);
  await wait(()=>js(`!!document.querySelector('main[data-ready="true"] #connection-code')`),'phone connection');
  if(await js(`!!document.querySelector('.qr-frame')`))throw Error('Phone must not host');
+ w.setContentSize(430,932);await wait(()=>js(`document.querySelector('.qr-scanner')?.classList.contains('scanning')`),'scanner preview');await delay(400);fs.writeFileSync(path.join(__dirname,'../.cache/qa/phone-scanner.png'),(await w.webContents.capturePage()).toPNG());
  await js(`document.querySelector('#connection-code').focus()`);await w.webContents.insertText('ABCD EFGH');
  await wait(()=>js(`!document.querySelector('.code-form button').disabled`),'manual input');
  if(!await js(`document.querySelector('meta[name="robots"]').content.includes('noindex')`))throw Error('Connection route must be noindex');

@@ -6,6 +6,7 @@ import {Switch} from '@/components/ui/switch';
 import {Sheet,SheetContent,SheetHeader,SheetTitle,SheetDescription} from '@/components/ui/sheet';
 import {Select,SelectTrigger,SelectValue,SelectContent,SelectItem} from '@/components/ui/select';
 import QRCode from 'qrcode';
+import QrScanner from './qr-scanner';
 import {Input} from '@/components/ui/input';
 import {HelpButton,DownloadActions} from './product-actions';
 import {DEVELOPER} from '@/lib/product';
@@ -20,11 +21,12 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
   const [link,setLink]=useState(''),[qr,setQr]=useState(''),[info,setInfo]=useState<CameraInfo>(EMPTY_INFO);
   const [busy,setBusy]=useState(false),[copied,setCopied]=useState(false),[mirror,setMirror]=useState(false),[rotation,setRotation]=useState(0);
   const [autoRotate,setAutoRotate]=useState(true),[grid,setGrid]=useState(false),[crop,setCrop]=useState(1),[zoom,setZoom]=useState(1);
-  const [stats,setStats]=useState({fps:0,mbps:0}),[nativeState,setNativeState]=useState({installed:false,consumer:false,error:''});
+  const [stats,setStats]=useState({fps:0,mbps:0}),[nativeState,setNativeState]=useState({installed:false,consumer:false,error:'',update:''});
   const [elapsed,setElapsed]=useState(0),[outputFrames,setOutputFrames]=useState(0);
   const [panel,setPanel]=useState(false),[pairCode,setPairCode]=useState(''),[manualCode,setManualCode]=useState(''),[hasPair,setHasPair]=useState(false);
   const video=useRef<HTMLVideoElement>(null),canvas=useRef<HTMLCanvasElement>(null),surface=useRef<HTMLDivElement>(null);
   const session=useRef<CameraSession|null>(null),auto=useRef(true),output=useRef({mirror:false,rotation:0,crop:1,fps:30});
+  const stopScanner=useRef<()=>void>(()=>{});
   const running=state==='live'||state==='paused';
   useEffect(()=>{
     const controller=new CameraSession({state:setState,note:setNote,error:setError,info:setInfo,link:setLink,code:setPairCode,busy:setBusy,
@@ -35,7 +37,7 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
     const consumeLink=()=>{
       const hash=new URLSearchParams(location.hash.slice(1)),id=hash.get('room'),token=hash.get('key');
       if(!id||!token)return;
-      controller.stop();controller.pair={id,token};controller.phone=true;setPhone(true);setHasPair(true);
+      stopScanner.current();controller.stop();controller.pair={id,token};controller.phone=true;setPhone(true);setHasPair(true);
       history.replaceState(null,'',location.pathname==='/'?'/connect':location.pathname);
       void controller.connectPhone();
     };
@@ -58,10 +60,11 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
     const timer=setInterval(async()=>{
       setElapsed(Math.floor((Date.now()-started)/1000));const report=await session.current?.peer?.getStats().catch(()=>null);
       report?.forEach((r:any)=>{if(r.kind==='video'&&r.type===(phone?'outbound-rtp':'inbound-rtp')){const nb=r.bytesReceived??r.bytesSent??0,nf=r.framesDecoded??r.framesEncoded??0,dt=(r.timestamp-time)/1000;if(time&&dt>0)setStats({fps:Math.round((nf-frames)/dt),mbps:(nb-bytes)*8/dt/1000000});bytes=nb;frames=nf;time=r.timestamp}});
-      if(window.vcam){const s=await window.vcam.status();setNativeState({...s,error:s.error||''})}
+      if(window.vcam){const s=await window.vcam.status();setNativeState({...s,error:s.error||'',update:s.update||''})}
     },1000);return()=>clearInterval(timer);
   },[running,phone]);
-  useEffect(()=>{if(native)void window.vcam?.status().then(s=>setNativeState({...s,error:s.error||''}))},[native]);
+  useEffect(()=>{if(native)void window.vcam?.status().then(s=>setNativeState({...s,error:s.error||'',update:s.update||''}))},[native]);
+  useEffect(()=>{if(!native)return;const timer=setInterval(()=>{void window.vcam?.status().then(s=>setNativeState({...s,error:s.error||'',update:s.update||''})).catch(()=>{})},15000);return()=>clearInterval(timer)},[native]);
   useEffect(()=>{
     if(phone||!running)return;let cancelled=false,frames=0,last=performance.now(),timer:ReturnType<typeof setTimeout>;
     const draw=async()=>{
@@ -77,7 +80,7 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
     };void draw();return()=>{cancelled=true;clearTimeout(timer)};
   },[running,phone,state]);
   const command=(name:string,value:any,key?:string)=>void session.current?.command(name,value,key);
-  const connect=()=>{if(phone){if(!session.current?.pair&&manualCode.replace(/\s/g,'').length===8){session.current!.pair={code:manualCode};setHasPair(true)}void session.current?.connectPhone()}else void session.current?.host()};
+  const connect=()=>{stopScanner.current();if(phone){if(!session.current?.pair&&manualCode.replace(/\s/g,'').length===8){session.current!.pair={code:manualCode};setHasPair(true)}void session.current?.connectPhone()}else void session.current?.host()};
   const copy=async()=>{try{await navigator.clipboard.writeText(link);setCopied(true);setTimeout(()=>setCopied(false),2000)}catch{setError('Не удалось скопировать ссылку. Используй QR-код.')}};
   const fullscreen=()=>{if(surface.current?.requestFullscreen)void surface.current.requestFullscreen().catch(()=>{});else setError('Полноэкранный режим недоступен.')};
   const caps=info.capabilities,settings=info.settings as any;
@@ -85,12 +88,12 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
   const time=`${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
   const quality=settings.width?(Math.max(settings.width,settings.height)>=3840?'4K':Math.max(settings.width,settings.height)>=1920?'HD':'720'):'АВТО';
   const controlsDisabled=!running||busy;
-  const modePicker=<Select value={currentMode==='-1'?undefined:currentMode} onValueChange={v=>command('mode',v)} disabled={controlsDisabled||!info.modes.length}><SelectTrigger className="quality-select" aria-label="Качество видео"><span>{quality}{settings.frameRate?` · ${Math.round(settings.frameRate)}`:''}</span></SelectTrigger><SelectContent>{info.modes.map(i=><SelectItem key={i} value={i}>{MODES[Number(i)][0]} FPS</SelectItem>)}</SelectContent></Select>;
-  return <div className={`camera-shell ${native?'native-shell':''}`}>{native&&<div className="desktop-titlebar"><img src="./brand/icon-64.png" width="22" height="22" alt=""/><span>VCam</span><span className="titlebar-note">Камера телефона</span></div>}<main data-ready={ready} className={`vcam ${phone?'phone-app':''} ${running?'is-live':''}`}>
+  const modePicker=<Select value={currentMode==='-1'?undefined:currentMode} onValueChange={v=>command('mode',v)} disabled={controlsDisabled||!info.modes.length}><SelectTrigger className="quality-select" aria-label="Качество видео"><SelectValue placeholder={quality}><span>{quality}{settings.frameRate?` · ${Math.round(settings.frameRate)}`:''}</span></SelectValue></SelectTrigger><SelectContent position="popper" align="end" className="quick-quality-menu">{info.modes.map(i=><SelectItem key={i} value={i}>{MODES[Number(i)][0]} FPS</SelectItem>)}</SelectContent></Select>;
+  return <div className={`camera-shell ${native?'native-shell':''}`}>{native&&<div className="desktop-titlebar"><img src="./brand/icon-64.png" width="22" height="22" alt=""/><span>VCam</span></div>}<main data-ready={ready} className={`vcam ${phone?'phone-app':''} ${running?'is-live':''}`}>
     <header className="camera-header">
       <a className="app-name" href={native?undefined:'/'}>{native?'Камера':'VCam'}</a>
       <span className={`connection-state ${running?'connected':''}`}>{running?(state==='paused'?'Пауза':time):state==='pairing'?'Подключение':state==='opening'||state==='connecting'?'Подключение…':'Не подключено'}</span>
-      <div className="header-actions"><HelpButton/>{modePicker}<button className="plain-icon" aria-label="Настройки" onClick={()=>setPanel(true)}><Settings2 size={21}/></button></div>
+      <div className="header-actions"><HelpButton/>{running&&modePicker}<button className="plain-icon" aria-label="Настройки" onClick={()=>setPanel(true)}><Settings2 size={21}/></button></div>
     </header>
     <section className="viewfinder" ref={surface}>
       <video ref={video} autoPlay playsInline muted className={phone?'phone-video':'source-video'}/>
@@ -100,10 +103,10 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
         {!phone&&<div className="lens-strip">{info.devices.filter(d=>!/front|user|перед|фронт/i.test(d.label)).slice(0,4).map((d,index)=><button key={d.id} className={`lens-button ${settings.deviceId===d.id?'active':''}`} disabled={busy} onClick={()=>command('device',d.id)} title={d.label}>{/ultra|сверх/i.test(d.label)?'Широкий':/tele|теле/i.test(d.label)?'Теле':/back|rear|задн/i.test(d.label)?'Основной':`Камера ${index+1}`}</button>)}<button className="zoom-button" onClick={()=>setPanel(true)} title={caps.zoom?'Зум камеры':'Цифровой зум'}>{(caps.zoom?zoom:crop).toFixed(1).replace('.0','')}<small>×</small></button></div>}
       </>}
       {!running&&<div className={`connect-screen ${qr?'pairing-screen':''}`}>
-        {qr?<><h1>Подключи телефон.</h1><p className="pair-intro">Одна сеть Wi-Fi. Один QR.</p><div className="qr-frame"><img src={qr} width={228} height={228} alt="QR-код подключения"/></div><p className="connect-label">Отсканируй камерой телефона</p>{pairCode&&<div className="manual-pair"><span>или введи код на vcam.prodbyeddy.chatgpt.site</span><strong data-testid="pair-code">{pairCode.slice(0,4)} {pairCode.slice(4)}</strong><small>Одноразовый · 10 минут</small></div>}<button className="text-button" onClick={copy}>{copied?<Check size={16}/>:<Link2 size={16}/>} {copied?'Скопировано':'Скопировать ссылку'}</button></>:
+        {qr?<><div className="qr-frame"><img src={qr} width={228} height={228} alt="QR-код подключения"/></div><p className="connect-label">Отсканируй камерой телефона</p>{pairCode&&<div className="manual-pair"><span>или введи код на vcam.prodbyeddy.chatgpt.site</span><strong data-testid="pair-code">{pairCode.slice(0,4)} {pairCode.slice(4)}</strong><small>Одноразовый · 10 минут</small></div>}<button className="text-button" onClick={copy}>{copied?<Check size={16}/>:<Link2 size={16}/>} {copied?'Скопировано':'Скопировать ссылку'}</button></>:
         state==='opening'||state==='connecting'?<><LoaderCircle className="spin" size={30}/><h1>Подключаем камеру.</h1><p className="connect-label" role="status">{note||'Подключение…'}</p><p className="permission-note">Если браузер спросит — разреши доступ к камере.</p></>:
-        phone?<><img className="connect-brand" src="/brand/icon-192.png" width="72" height="72" alt=""/><h1>{hasPair&&session.current?.pair?'Остался доступ к камере.':'Подключи телефон.'}</h1><p className="pair-intro">{hasPair&&session.current?.pair?'Разреши камеру, чтобы передать видео на компьютер.':'Введи код из приложения VCam на Windows.'}</p>{hasPair&&session.current?.pair?<button className="primary-button" disabled={!ready} onClick={connect}>Разрешить камеру и подключиться</button>:<form className="code-form" onSubmit={e=>{e.preventDefault();connect()}}><label htmlFor="connection-code">Код подключения</label><Input id="connection-code" name="code" placeholder="ABCD EFGH" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} value={manualCode} onChange={e=>setManualCode(e.target.value.toUpperCase().replace(/[^A-Z2-9 ]/g,''))}/><button className="primary-button" type="submit" disabled={!ready||manualCode.replace(/\s/g,'').length!==8}>Подключиться</button></form>}<HelpButton label/><div className="phone-download"><span>Ещё нет приложения на компьютере?</span><DownloadActions compact/></div></>:
-        <><img className="connect-brand" src="./brand/icon-192.png" width="84" height="84" alt=""/><h1>Твой телефон — в кадре.</h1><p className="pair-intro">Подключи камеру телефона к Windows.<br/>Дальше всё здесь.</p><button className="primary-button" disabled={!ready} onClick={connect}><ScanLine size={19}/>Подключить телефон</button><p className="wifi-note"><Wifi size={15}/>Компьютер и телефон в одной сети Wi-Fi</p><HelpButton label/></>}
+        phone?<>{hasPair&&session.current?.pair?<><p className="permission-note">Разреши доступ к камере для передачи видео.</p><button className="primary-button" disabled={!ready} onClick={connect}>Включить камеру</button></>:<>{ready&&<QrScanner stopRef={stopScanner} onPair={pair=>{if(!session.current)return;session.current.pair=pair;setHasPair(true);void session.current.connectPhone()}}/>}<form className="code-form" onSubmit={e=>{e.preventDefault();connect()}}><label htmlFor="connection-code">Или введи код</label><div className="code-entry"><Input id="connection-code" name="code" placeholder="ABCD EFGH" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={9} value={manualCode} onChange={e=>setManualCode(e.target.value.toUpperCase().replace(/[^A-Z2-9 ]/g,''))}/><button className="primary-button" type="submit" disabled={!ready||manualCode.replace(/\s/g,'').length!==8} aria-label="Подключиться по коду"><ArrowUpRight size={21}/></button></div></form></>}</>:
+        <><img className="connect-brand" src="./brand/icon-192.png" width="84" height="84" alt=""/><button className="primary-button" disabled={!ready} onClick={connect}><ScanLine size={19}/>Показать QR-код</button><p className="wifi-note"><Wifi size={15}/>Компьютер и телефон — в одной сети Wi-Fi</p></>}
       </div>}
       {(error||note&&running)&&<div className={`message ${error?'error':''}`} role={error?'alert':'status'}>{error||note}<button aria-label="Закрыть сообщение" onClick={()=>{setError('');setNote('')}}><X size={16}/></button></div>}
     </section>
@@ -124,7 +127,8 @@ export default function CameraApp({phoneMode=false}:{phoneMode?:boolean}){
         {caps.torch&&<label className="toggle-row"><span>Фонарик</span><Switch className="camera-switch" checked={!!settings.torch} onCheckedChange={v=>command('constraint',v,'torch')} disabled={busy} aria-label="Фонарик"/></label>}
         {running&&<dl className="stream-details"><div><dt>Поток</dt><dd>{video.current?.videoWidth} × {video.current?.videoHeight}</dd></div><div><dt>Частота</dt><dd>{stats.fps} FPS</dd></div><div><dt>Сеть</dt><dd>{stats.mbps.toFixed(1)} Мбит/с</dd></div>{native&&<div><dt>Выход</dt><dd>{outputFrames} FPS</dd></div>}</dl>}
         {native?<p className="native-status">{nativeState.error||(nativeState.installed?(nativeState.consumer?'VCam используется':'Выбери VCam в приложении для звонков'):'Установи VCam Setup для активации камеры')}</p>:!phone&&<a className="download-link" href={DOWNLOAD} target="_blank" rel="noreferrer"><Download size={17}/>Скачать для Windows</a>}
+        {native&&<div className="app-update-status"><span>VCam {window.vcam?.version}</span><p>{nativeState.update||'Автообновления: проверка каждый час'}</p></div>}
       </div>
     </SheetContent></Sheet>
-  </main><footer className="camera-footer"><a href={DEVELOPER} target="_blank" rel="noreferrer">Связаться с разработчиком<ArrowUpRight size={18}/></a><span>prodbyeddy.com</span></footer></div>;
+  </main><footer className="camera-footer"><a href={DEVELOPER} target="_blank" rel="noreferrer">Связаться с разработчиком<ArrowUpRight size={18}/></a>{phone&&!running?<a className="phone-download-link" href={DOWNLOAD} target="_blank" rel="noreferrer"><Download size={16}/>Скачать для Windows</a>:<span>prodbyeddy.com</span>}</footer></div>;
 }
