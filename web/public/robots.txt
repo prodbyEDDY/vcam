@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /connect
+Sitemap: https://vcam.prodbyeddy.chatgpt.site/sitemap.xml

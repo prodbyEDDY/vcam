@@ -1,2 +1,3 @@
-import CameraApp from '@/components/camera-app';
-export default function Home(){ return <CameraApp/>; }
+import SiteHome from '@/components/site-home';
+import {SITE,VERSION,INSTALLER,GITHUB} from '@/lib/product';
+export default function Home(){const schema={'@context':'https://schema.org','@type':'SoftwareApplication',name:'VCam',url:SITE,applicationCategory:'MultimediaApplication',operatingSystem:'Windows 10, Windows 11',softwareVersion:VERSION,downloadUrl:INSTALLER,codeRepository:GITHUB,isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'USD'},author:{'@type':'Person',name:'EDDY',url:'https://prodbyeddy.com'},description:'Бесплатная альтернатива iVcam без рекламы: камера телефона для Windows, подключение из браузера по QR или коду.'};return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/><SiteHome/></>; }

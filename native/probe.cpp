@@ -36,8 +36,9 @@ int wmain(int argc,wchar_t** argv){
  SharedImageMemory sender(0);std::vector<uint8_t> rgba(1920*1080*4);
  for(size_t i=0;i<rgba.size();i+=4){rgba[i]=219;rgba[i+1]=73;rgba[i+2]=31;rgba[i+3]=255;}
  if(external){
-   bool found=false;
-   for(int i=0;i<300&&!found;i++){Sleep(50);long n=0;if(SUCCEEDED(sample->GetCurrentBuffer(&n,nullptr))&&n>0){std::vector<uint8_t> frame(n);if(SUCCEEDED(sample->GetCurrentBuffer(&n,(long*)frame.data()))){for(size_t j=0;j<frame.size();j+=997){if(frame[j]>40){found=true;break;}}}}}
+   const bool motion=argc>2&&wcscmp(argv[2],L"--motion")==0;bool found=false;unsigned previous=0;int changes=0;
+   for(int i=0;i<300&&(!found||motion&&i<100);i++){Sleep(50);long n=0;if(SUCCEEDED(sample->GetCurrentBuffer(&n,nullptr))&&n>0){std::vector<uint8_t> frame(n);if(SUCCEEDED(sample->GetCurrentBuffer(&n,(long*)frame.data()))){unsigned hash=2166136261u;for(size_t j=0;j<frame.size();j+=997){hash=(hash^frame[j])*16777619u;if(frame[j]>40)found=true;}if(previous&&hash!=previous)changes++;previous=hash;}}}
+   if(motion){printf("Changing frames while minimized: %d\n",changes);found=found&&changes>=10;}
    printf("External desktop pipeline %s\n",found?"PASS":"FAIL");control->Stop();control->Release();sample->Release();graph->Release();camera->Release();grabber->Release();sink->Release();factory->Release();FreeLibrary(dll);CoUninitialize();return found?0:4;
  }
  for(int i=0;i<50;i++){if(sender.SendIsReady())sender.Send(1920,1080,1920,(DWORD)rgba.size(),SharedImageMemory::FORMAT_UINT8,SharedImageMemory::RESIZEMODE_LINEAR,SharedImageMemory::MIRRORMODE_DISABLED,500,rgba.data());Sleep(20);}

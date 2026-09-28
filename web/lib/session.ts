@@ -1,13 +1,13 @@
 import { CameraInfo, gather, inspectCamera, probeModes, setMode, sleep } from './camera';
 export type SessionState = 'idle'|'opening'|'pairing'|'connecting'|'live'|'paused'|'error';
-export type Room={id:string;hostToken?:string;phoneToken?:string;pairToken?:string;expires?:number};
+export type Room={id:string;hostToken?:string;phoneToken?:string;pairToken?:string;code?:string;expires?:number};
 export const EMPTY_INFO:CameraInfo={settings:{},capabilities:{},devices:[],modes:[]};
 declare global { interface Window { vcam?: {site:string;version:string;api:(path:string,options:any)=>Promise<any>;frame:(w:number,h:number,data:ArrayBuffer)=>Promise<boolean>;status:()=>Promise<{installed:boolean;consumer:boolean;error?:string}>} } }
 export const friendly=(e:any)=>e?.name==='NotAllowedError'?'Разреши доступ к камере в настройках Safari.':e?.name==='OverconstrainedError'?'Этот режим недоступен для выбранной камеры.':e?.name==='NotReadableError'?'Камера занята другим приложением.':e?.message||'Не удалось подключиться. Попробуй ещё раз.';
-type Events={state:(s:SessionState)=>void;note:(s:string)=>void;error:(s:string)=>void;info:(i:CameraInfo)=>void;link:(s:string)=>void;stream:(s:MediaStream|null)=>void;busy:(b:boolean)=>void;orientation:(a:number)=>void};
+type Events={state:(s:SessionState)=>void;note:(s:string)=>void;error:(s:string)=>void;info:(i:CameraInfo)=>void;link:(s:string)=>void;code?:(s:string)=>void;stream:(s:MediaStream|null)=>void;busy:(b:boolean)=>void;orientation:(a:number)=>void};
 export class CameraSession {
   peer:RTCPeerConnection|null=null; channel:RTCDataChannel|null=null; stream:MediaStream|null=null;
-  room:Room|null=null;pair:{id:string;token:string}|null=null; epoch=0;info=EMPTY_INFO;phone=false;wake:any=null;
+  room:Room|null=null;pair:{id:string;token:string}|{code:string}|null=null; epoch=0;info=EMPTY_INFO;phone=false;wake:any=null;
   private queue=Promise.resolve(); private pending=new Map<string,{resolve:()=>void;reject:(e:any)=>void;timer:any}>();
   constructor(private events:Events){}
   async api(path:string,options:any={}) {
@@ -27,7 +27,7 @@ export class CameraSession {
     this.stream?.getTracks().forEach(t=>{t.onended=null;t.stop()});this.stream=null;this.events.stream(null);
     this.wake?.release().catch(()=>{});this.wake=null;
     const r=this.room;this.room=null;if(r?.hostToken)void this.api(this.path(r,'host'),{method:'DELETE',headers:this.auth(r,'host')}).catch(()=>{});
-    this.events.link('');this.events.state('idle');this.events.busy(false);this.events.note('');this.setInfo(EMPTY_INFO);
+    this.events.link('');this.events.code?.('');this.events.state('idle');this.events.busy(false);this.events.note('');this.setInfo(EMPTY_INFO);
   }
   private fail(e:any){this.stop(false);this.events.error(friendly(e));this.events.state('error')}
   private makePeer(epoch:number){
@@ -53,16 +53,17 @@ export class CameraSession {
     };
   }
   private async poll(p:RTCPeerConnection,r:Room,role:string,epoch:number){
-    const deadline=Date.now()+240000;
+    const deadline=Math.min(r.expires||Infinity,Date.now()+600000);
     while(this.epoch===epoch&&Date.now()<deadline){
       const {messages}=await this.api(this.path(r,role),{headers:this.auth(r,role)});
       if(this.epoch!==epoch)return false;
-      if(messages.length){await p.setRemoteDescription(messages[0]);return true}await sleep(1000);
+      if(messages.length){await p.setRemoteDescription(messages[0]);return true}await sleep(role==='host'?2500:800);
     }
     if(this.epoch===epoch)throw new Error('Время ожидания истекло. Создай новый QR.');return false;
   }
   private timeout(p:RTCPeerConnection,epoch:number){setTimeout(()=>{if(this.epoch===epoch&&p.connectionState!=='connected')this.fail(new Error('Не удалось передать видео. Проверь Wi-Fi и создай новый QR-код.'))},30000)}
   async host(){
+    if(!window.vcam){this.events.error('Создай подключение в приложении VCam для Windows.');return}
     this.stop();this.phone=false;this.events.error('');this.events.state('opening');this.events.note('Готовим подключение…');const epoch=this.epoch;
     try{
       const r:Room=await this.api('/api/session',{method:'POST',body:'{}'});if(this.epoch!==epoch)return;this.room=r;
@@ -70,8 +71,8 @@ export class CameraSession {
       p.ontrack=e=>{if(this.epoch===epoch){this.stream=e.streams[0]||new MediaStream([e.track]);this.events.stream(this.stream)}};
       await p.setLocalDescription(await p.createOffer());await gather(p);if(this.epoch!==epoch)return;
       await this.api(this.path(r,'host'),{method:'POST',headers:this.auth(r,'host'),body:JSON.stringify(p.localDescription)});
-      this.events.link(`${window.vcam?.site||location.origin}/#room=${r.id}&key=${r.pairToken}`);this.events.state('pairing');this.events.note('');
-      if(await this.poll(p,r,'host',epoch)){this.events.link('');this.events.state('connecting');this.events.note('Подключаем видеопоток…');this.timeout(p,epoch)}
+      this.events.link(`${window.vcam.site}/connect#room=${r.id}&key=${r.pairToken}`);this.events.code?.(r.code||'');this.events.state('pairing');this.events.note('');
+      if(await this.poll(p,r,'host',epoch)){this.events.link('');this.events.code?.('');this.events.state('connecting');this.events.note('Подключаем видеопоток…');this.timeout(p,epoch)}
     }catch(e){if(this.epoch===epoch)this.fail(e)}
   }
   private bind(track:MediaStreamTrack){
@@ -92,13 +93,14 @@ export class CameraSession {
   }
   async connectPhone(){
     if(!this.pair){this.events.error('Открой VCam на компьютере и отсканируй новый QR-код.');return}
+    const pair=this.pair;
     this.stop();this.phone=true;this.events.error('');this.events.state('opening');this.events.note('Открываем камеру…');const epoch=this.epoch;
     const D=(window as any).DeviceOrientationEvent;if(D?.requestPermission)void D.requestPermission().catch(()=>{});
     try{
       if(!navigator.mediaDevices?.getUserMedia)throw new Error('Для камеры нужен Safari и защищённая HTTPS-ссылка.');
       const media=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30}},audio:false});
       if(this.epoch!==epoch){media.getTracks().forEach(t=>t.stop());return}this.stream=media;this.events.stream(media);void this.wakeScreen();
-      const joined=await this.api('/api/join',{method:'POST',body:JSON.stringify(this.pair)});const r:Room={id:this.pair.id,phoneToken:joined.phoneToken};this.room=r;this.pair=null;
+      const joined=await this.api('/api/join',{method:'POST',body:JSON.stringify(pair)});if(this.epoch!==epoch)return;const r:Room={id:joined.id||('id'in pair?pair.id:''),phoneToken:joined.phoneToken};this.room=r;this.pair=null;
       await this.scan(media.getVideoTracks()[0]);if(this.epoch!==epoch)return;this.bind(media.getVideoTracks()[0]);
       const p=this.makePeer(epoch);p.ondatachannel=e=>this.attachChannel(e.channel);media.getTracks().forEach(t=>p.addTrack(t,media));
       this.events.state('connecting');this.events.note('Соединяемся с компьютером…');

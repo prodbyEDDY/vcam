@@ -2,6 +2,8 @@ const encoder = new TextEncoder();
 export const digest = async (s) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(s))), x => x.toString(16).padStart(2, '0')).join('');
 const token = () => Array.from(crypto.getRandomValues(new Uint8Array(32)), x => x.toString(16).padStart(2, '0')).join('');
 const validToken = (v) => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v);
+const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const makeCode=()=>Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>alphabet[b&31]).join('');
 const json = (body, status = 200) => Response.json(body, {status, headers: {'Cache-Control':'no-store', 'Referrer-Policy':'no-referrer'}});
 
 export async function signaling(request, db) {
@@ -21,20 +23,31 @@ export async function signaling(request, db) {
       const key = await digest(ip + ':' + Math.floor(now / 300000));
       const limit = await db.prepare('INSERT INTO limits (key, count, expires) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET count=count+1 RETURNING count').bind(key, now + 600000).first();
       if (limit.count > 30) return json({error:'Слишком много подключений. Подожди несколько минут.'}, 429);
-      const id = crypto.randomUUID(), hostToken = token(), pairToken = token();
+      const id = crypto.randomUUID(), hostToken = token(), pairToken = token(), code=makeCode();
       await db.batch([
         db.prepare('DELETE FROM signals WHERE room IN (SELECT id FROM rooms WHERE expires < ?)').bind(now),
         db.prepare('DELETE FROM rooms WHERE expires < ?').bind(now),
         db.prepare('DELETE FROM limits WHERE expires < ?').bind(now),
-        db.prepare('INSERT INTO rooms (id, host_hash, pair_hash, expires) VALUES (?, ?, ?, ?)').bind(id, await digest(hostToken), await digest(pairToken), now + 600000)
+        db.prepare('INSERT INTO rooms (id, host_hash, pair_hash, code_hash, expires) VALUES (?, ?, ?, ?, ?)').bind(id, await digest(hostToken), await digest(pairToken), await digest(code), now + 600000)
       ]);
-      return json({id, hostToken, pairToken, expires:now + 600000});
+      return json({id, hostToken, pairToken, code, expires:now + 600000});
     }
     if (action === 'join' && request.method === 'POST') {
-      if (!validToken(body.token) || typeof body.id !== 'string') return json({error:'Некорректная ссылка.'}, 400);
+      let codeHash=null;
+      if(typeof body.code==='string'){
+        const code=body.code.toUpperCase().replace(/[\s-]/g,'');
+        if(!/^[A-HJ-NP-Z2-9]{8}$/.test(code))return json({error:'Введи 8 символов кода из приложения VCam на компьютере.'},400);
+        const ip=request.headers.get('cf-connecting-ip')||'local';
+        const key=await digest('join:'+ip+':'+Math.floor(now/300000));
+        const limit=await db.prepare('INSERT INTO limits (key, count, expires) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET count=count+1 RETURNING count').bind(key,now+600000).first();
+        if(limit.count>30)return json({error:'Слишком много попыток. Подожди пять минут или отсканируй QR.'},429);
+        codeHash=await digest(code);
+      }else if (!validToken(body.token) || typeof body.id !== 'string') return json({error:'Некорректная ссылка.'}, 400);
       const phoneToken = token();
-      const row = await db.prepare('UPDATE rooms SET phone_hash=?, pair_hash=NULL WHERE id=? AND pair_hash=? AND phone_hash IS NULL AND expires>? RETURNING id').bind(await digest(phoneToken), body.id, await digest(body.token), now).first();
-      return row ? json({phoneToken}) : json({error:'Этот QR уже использован или устарел. Создай новый на компьютере.'}, 410);
+      const row = codeHash
+        ? await db.prepare('UPDATE rooms SET phone_hash=?, pair_hash=NULL, code_hash=NULL WHERE code_hash=? AND phone_hash IS NULL AND expires>? RETURNING id').bind(await digest(phoneToken),codeHash,now).first()
+        : await db.prepare('UPDATE rooms SET phone_hash=?, pair_hash=NULL, code_hash=NULL WHERE id=? AND pair_hash=? AND phone_hash IS NULL AND expires>? RETURNING id').bind(await digest(phoneToken),body.id,await digest(body.token),now).first();
+      return row ? json({id:row.id,phoneToken}) : json({error:'Код не найден, уже использован или устарел. Создай новый в VCam на компьютере.'}, 410);
     }
     if (action !== 'signal' || !['GET','POST','DELETE'].includes(request.method)) return json({error:'Не найдено.'}, 404);
     const id = url.searchParams.get('id'), role = url.searchParams.get('role');

@@ -16,10 +16,34 @@ app.whenReady().then(async()=>{
   await host.webContents.executeJavaScript(`document.querySelector('.text-button').click()`);const link=await host.webContents.executeJavaScript('window.testLink');
   const phoneSession=session.fromPartition('vcam-phone-test');phoneSession.setPermissionRequestHandler((_w,p,cb)=>cb(p==='media'));
   phone=new BrowserWindow({show:false,width:430,height:932,webPreferences:{session:phoneSession,backgroundThrottling:false}});await phone.loadURL(link);
-  await wait(()=>phone.webContents.executeJavaScript(`!!document.querySelector('.primary-button')&&!document.querySelector('.primary-button').disabled`),'phone ready');await phone.webContents.executeJavaScript(`document.querySelector('.primary-button').click()`);
+  // A QR navigation must start the camera automatically; no extra shutter click.
+  await wait(()=>phone.webContents.executeJavaScript(`!!document.querySelector('video')?.srcObject`),'automatic phone camera');
   await wait(()=>host.webContents.executeJavaScript(`document.querySelector('.live-pill')?.textContent.includes('LIVE')`),'desktop video');
   await checkCameraUI(host,{live:true});
-  const result=await new Promise((resolve,reject)=>{const p=spawn(path.join(__dirname,'../.cache/VCamProbe.exe'),[path.join(__dirname,'../native/bin/VCamCamera64.dll'),'--external'],{windowsHide:true});let output='';p.stdout.on('data',c=>output+=c);p.on('error',reject);p.on('exit',code=>code===0?resolve(output):reject(new Error(output||'Native probe failed')))});
+  host.minimize();await wait(async()=>host.isMinimized(),'minimized window');
+  const result=await new Promise((resolve,reject)=>{const p=spawn(path.join(__dirname,'../.cache/VCamProbe.exe'),[path.join(__dirname,'../native/bin/VCamCamera64.dll'),'--motion'],{windowsHide:true});let output='';p.stdout.on('data',c=>output+=c);p.on('error',reject);p.on('exit',code=>code===0?resolve(output):reject(new Error(output||'Native probe failed')))});
+
+  console.log(result);host.restore();host.hide();
+  await host.webContents.executeJavaScript(`document.querySelector('.disconnect').click()`);
+  await wait(()=>phone.webContents.executeJavaScript(`document.querySelector('video').srcObject===null`),'phone release before rescan');
+  await host.webContents.executeJavaScript(`document.querySelector('.primary-button').click()`);
+  await wait(()=>host.webContents.executeJavaScript(`!!document.querySelector('.qr-frame img')`),'new QR');
+  await host.webContents.executeJavaScript(`document.querySelector('.text-button').click()`);
+  const secondLink=await host.webContents.executeJavaScript('window.testLink');
+  await phone.webContents.executeJavaScript('location.hash='+JSON.stringify(new URL(secondLink).hash));
+  await wait(()=>host.webContents.executeJavaScript(`document.querySelector('.live-pill')?.textContent.includes('LIVE')`),'automatic rescan in same tab');
+  await host.webContents.executeJavaScript(`document.querySelector('.disconnect').click()`);
+  await wait(()=>phone.webContents.executeJavaScript(`document.querySelector('video').srcObject===null`),'phone release before code');
+  await host.webContents.executeJavaScript(`document.querySelector('.primary-button').click()`);
+  await wait(()=>host.webContents.executeJavaScript(`!!document.querySelector('[data-testid="pair-code"]')`),'manual pairing code');
+  const code=await host.webContents.executeJavaScript(`document.querySelector('[data-testid="pair-code"]').textContent`);
+  await phone.loadURL(new URL('/connect',secondLink).href);
+  await wait(()=>phone.webContents.executeJavaScript(`!!document.querySelector('main[data-ready="true"] #connection-code')`),'manual connection page');
+  await phone.webContents.executeJavaScript(`document.querySelector('#connection-code').focus()`);await phone.webContents.insertText(code);
+  await wait(()=>phone.webContents.executeJavaScript(`!document.querySelector('.code-form button').disabled`),'code input ready');
+  await phone.webContents.executeJavaScript(`document.querySelector('.code-form').requestSubmit()`);
+  await wait(()=>host.webContents.executeJavaScript(`document.querySelector('.live-pill')?.textContent.includes('LIVE')`),'manual code connection');
+  console.log('Automatic QR, same-tab rescan, manual code, minimized moving video: PASS');
   const state=await host.webContents.executeJavaScript('window.vcam.status()');
   const dimensions=await host.webContents.executeJavaScript(`({width:document.querySelector('video').videoWidth,height:document.querySelector('video').videoHeight})`);
   fs.writeFileSync(path.join(__dirname,'../.cache/qa/windows-live.png'),(await host.webContents.capturePage()).toPNG());
