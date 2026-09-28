@@ -2,7 +2,7 @@ const {app,BrowserWindow,ipcMain,shell,session}=require('electron');
 const {spawn,execFile}=require('node:child_process');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
-const SITE=!app.isPackaged&&process.env.VCAM_TEST_SITE==='http://127.0.0.1:5173'?process.env.VCAM_TEST_SITE:'https://vcam-eddy.prodbyeddy.chatgpt.site';
+const SITE=!app.isPackaged&&['http://127.0.0.1:5173','http://127.0.0.1:5174'].includes(process.env.VCAM_TEST_SITE)?process.env.VCAM_TEST_SITE:'https://vcam-eddy.prodbyeddy.chatgpt.site';
 let win,bridge,consumer=false,bridgeError='',inFlight=false;
 const ui=path.join(__dirname,'ui','index.html');
 const nativePath=()=>app.isPackaged?path.join(process.resourcesPath,'native'):path.join(__dirname,'..','native','bin');
