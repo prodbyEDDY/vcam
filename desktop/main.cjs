@@ -1,6 +1,7 @@
 const {app,BrowserWindow,ipcMain,shell,session}=require('electron');
 const {spawn,execFile}=require('node:child_process');
 const path=require('node:path');
+app.setAppUserModelId('dev.prodbyeddy.vcam');
 const {pathToFileURL}=require('node:url');
 // Video delivery must continue when the receiver window is minimized/occluded.
 app.commandLine.appendSwitch('disable-background-timer-throttling');

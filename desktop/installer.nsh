@@ -1,4 +1,5 @@
 !include "x64.nsh"
+!include "${PROJECT_DIR}\desktop\shortcut-icon.nsh"
 !macro customInstall
   ${DisableX64FSRedirection}
   nsExec::ExecToStack '"$SYSDIR\regsvr32.exe" /s "$INSTDIR\resources\native\VCamCamera64.dll"'
@@ -12,7 +13,12 @@
   Pop $0
   Pop $1
   ${EnableX64FSRedirection}
-  ; Refresh shortcut icons without rebuilding the user icon cache.
+  ; Override the builder's executable-based icon after its shortcut migration.
+  ; This also handles shortcuts retained by an automatic update.
+  ClearErrors
+  !insertmacro VCamRefreshShortcut "$newStartMenuLink"
+  ClearErrors
+  !insertmacro VCamRefreshShortcut "$newDesktopLink"
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 !macroend
 !macro customUnInstall

@@ -4,10 +4,10 @@
   <p><strong>Камера iPhone или Android для Windows</strong></p>
   <p>Бесплатная альтернатива iVcam. Без рекламы, подписки и водяного знака.<br>Приложение нужно только на компьютере. На телефоне — браузер.</p>
   <p>
-    <a href="https://github.com/prodbyEDDY/vcam/releases/download/v0.2.1/VCam-Setup-0.2.1-x64.exe"><img alt="Скачать VCam 0.2.1 для Windows" src="https://img.shields.io/badge/Windows-Скачать_v0.2.1-B9A0FF?style=for-the-badge&labelColor=242329" /></a>
+    <a href="https://github.com/prodbyEDDY/vcam/releases/download/v0.2.2/VCam-Setup-0.2.2-x64.exe"><img alt="Скачать VCam 0.2.2 для Windows" src="https://img.shields.io/badge/Windows-Скачать_v0.2.2-B9A0FF?style=for-the-badge&labelColor=242329" /></a>
     <a href="https://vcam.prodbyeddy.chatgpt.site"><img alt="Сайт VCam" src="https://img.shields.io/badge/VCam-Открыть_сайт-EEE6FF?style=for-the-badge&labelColor=242329" /></a>
   </p>
-  <p><a href="https://github.com/prodbyEDDY/vcam/releases/tag/v0.2.1">Что нового в 0.2.1</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/connect">Сканировать QR / ввести код</a> · <a href="https://prodbyeddy.com">Связаться с разработчиком</a></p>
+  <p><a href="https://github.com/prodbyEDDY/vcam/releases/tag/v0.2.2">Что нового в 0.2.2</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/connect">Сканировать QR / ввести код</a> · <a href="https://prodbyeddy.com">Связаться с разработчиком</a></p>
 </div>
 
 ![Мокап VCam: телефон заменяет веб-камеру, видеопоток открыт на ноутбуке](web/public/images/vcam-office.webp)
@@ -79,12 +79,12 @@ flowchart LR
 - **Фоновая работа:** Windows-приложение сворачивать можно. На телефоне держи страницу открытой и экран разблокированным.
 - **Звук:** пока не передаётся. Используй отдельный микрофон или микрофон компьютера.
 - **Установщик:** пока без сертификата издателя, поэтому Windows может показать предупреждение. Загружай установку только из [официальных релизов](https://github.com/prodbyEDDY/vcam/releases).
-- **Обновление с 0.2.0 и ниже:** установи 0.2.1 вручную один раз. В старых версиях нет механизма автоматического обновления. Следующие версии будут загружаться автоматически; Windows может запросить права администратора для установки.
+- **Обновление с 0.2.0 и ниже:** установи 0.2.2 вручную один раз. В старых версиях нет механизма автоматического обновления. Следующие версии будут загружаться автоматически; Windows может запросить права администратора для установки.
 
 ## Разработка и документация
 
 - [Сборка на Windows, архитектура и проверки](docs/DEVELOPMENT.md)
-- [Изменения и ограничения текущего выпуска](docs/RELEASE.md)
+- [Изменения текущего выпуска](docs/releases/0.2.2.md) · [Возможности и ограничения](docs/RELEASE.md)
 - [Нагрузка на сервер](docs/HOSTING.md)
 - [Источники изображений и промпты ImageGen](docs/IMAGEGEN.md)
 - [Лицензии сторонних компонентов](THIRD_PARTY_NOTICES.md)

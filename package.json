@@ -1,6 +1,6 @@
 {
   "name": "vcam",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "iPhone camera for Windows, connected by QR",
   "author": "prodbyEDDY",
   "private": true,
@@ -39,6 +39,10 @@
       {
         "from": "THIRD_PARTY_NOTICES.md",
         "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "desktop/icon.ico",
+        "to": "icons/vcam-purple-v1.ico"
       }
     ],
     "win": {
@@ -55,7 +59,9 @@
       "allowToChangeInstallationDirectory": true,
       "include": "desktop/installer.nsh",
       "deleteAppDataOnUninstall": false,
-      "runAfterFinish": false
+      "runAfterFinish": false,
+      "installerIcon": "desktop/icon.ico",
+      "uninstallerIcon": "desktop/icon.ico"
     },
     "publish": [
       {
