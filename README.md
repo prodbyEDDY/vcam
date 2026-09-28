@@ -2,7 +2,7 @@
 
 iPhone → Safari → WebRTC → Windows → виртуальная камера.
 
-Веб: https://vcam-eddy.prodbyeddy.chatgpt.site
+Веб: https://vcam.prodbyeddy.chatgpt.site
 
 Windows: https://github.com/prodbyEDDY/vcam/releases
 
