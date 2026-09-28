@@ -28,7 +28,7 @@ export default function SiteHome(){
  return <div className="landing"><a className="skip-link" href="#main">К содержимому</a>
  <header className="site-nav">
   <a className="brand" href="/" aria-label="VCam — главная"><img src="/brand/icon-64.png" width="36" height="36" alt=""/>VCam</a>
-  <nav aria-label="Разделы сайта"><a href="#features">Возможности</a><a href="#setup">Инструкция</a><a href="#faq">Вопросы</a></nav>
+  <nav aria-label="Разделы сайта"><a href="#features">Возможности</a><a href="#setup">Инструкция</a><a href="#faq">Вопросы</a><a href="/blog">Блог</a></nav>
   <div className="nav-actions"><a className="github-button" href={GITHUB} target="_blank" rel="noreferrer"><img src="/brands/github.svg" width="22" height="22" alt=""/>GitHub</a><a href="/connect" className="nav-connect"><ScanLine size={18}/>Попробовать</a></div>
  </header>
  <main id="main">
@@ -53,6 +53,7 @@ export default function SiteHome(){
   </section>
   <section className="setup-section" id="setup"><div className="section-heading"><h2>Как настроить VCam</h2><p>Подключи компьютер и телефон к одной сети Wi-Fi.</p></div><div className="setup-steps">{steps.map(({Icon,title,text},i)=><article key={title}><div className="setup-step-top"><span>{i+1}</span><Icon size={26}/></div><h3>{title}</h3><p>{text}</p></article>)}</div></section>
   <section className="faq-section" id="faq"><h2>Вопросы<br/>и ответы</h2><Accordion type="single" collapsible>{faqs.map(([q,a],i)=><AccordionItem value={String(i)} key={q}><AccordionTrigger>{q}</AccordionTrigger><AccordionContent>{a}</AccordionContent></AccordionItem>)}</Accordion></section>
+  <section className="home-blog"><div><h2>Инструкции и сравнения</h2><a href="/blog">Все статьи<ArrowUpRight size={19}/></a></div><div className="home-blog-grid">{[['ivcam-alternativa','Бесплатная альтернатива iVcam'],['iphone-veb-kamera-windows','iPhone как веб-камера Windows'],['telefon-kamera-obs','Как добавить телефон в OBS']].map(([slug,title])=><a key={slug} href={`/blog/${slug}`}><img src={`/images/blog/${slug}.webp`} alt="" width="1600" height="900" loading="lazy"/><h3>{title}</h3></a>)}</div></section>
   <section className="last-call"><img src="/brand/icon-64.png" width="54" height="54" alt=""/><h2>Скачать VCam<br/>для Windows</h2><DownloadActions/><a href="/connect" className="simple-link">Ввести код из приложения<ArrowRight size={16}/></a></section>
   <section className="developer-section"><a href={DEVELOPER} target="_blank" rel="noreferrer">Связаться с разработчиком<ArrowUpRight/></a><span>prodbyeddy.com</span></section>
  </main><footer className="site-footer"><span>VCam · Бесплатно и без рекламы</span><a href={GITHUB} target="_blank" rel="noreferrer">Исходный код<ArrowUpRight size={14}/></a><span>Разработчик — EDDY</span></footer></div>;

@@ -85,6 +85,8 @@ flowchart LR
 
 - [Сборка на Windows, архитектура и проверки](docs/DEVELOPMENT.md)
 - [Изменения текущего выпуска](docs/releases/0.2.2.md) · [Возможности и ограничения](docs/RELEASE.md)
+- [Блог: инструкции и сравнения](https://vcam.prodbyeddy.chatgpt.site/blog)
+- [SEO: структура блога и дальнейшая индексация](docs/SEO.md)
 - [Нагрузка на сервер](docs/HOSTING.md)
 - [Источники изображений и промпты ImageGen](docs/IMAGEGEN.md)
 - [Лицензии сторонних компонентов](THIRD_PARTY_NOTICES.md)
