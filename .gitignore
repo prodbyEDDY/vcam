@@ -1,0 +1,14 @@
+node_modules/
+.cache/
+release/
+desktop/ui/
+native/Build/
+native/bin/
+*.obj
+*.pdb
+*.ilk
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
