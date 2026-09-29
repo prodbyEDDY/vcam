@@ -4,7 +4,8 @@ import {ArrowRight,ArrowUpRight,Wifi,ScanLine,SlidersHorizontal,ShieldCheck,Moni
 import {Accordion,AccordionItem,AccordionTrigger,AccordionContent} from '@/components/ui/accordion';
 import {DownloadActions,HelpButton} from './product-actions';
 import CameraApp from './camera-app';
-import {GITHUB,DEVELOPER,VERSION} from '@/lib/product';
+import {GITHUB,DEVELOPER} from '@/lib/product';
+import {DownloadCount} from './download-count';
 export const faqs=[
  ['VCam полностью бесплатный?','Да. Все настройки доступны бесплатно. В приложении нет рекламы, подписки и водяного знака. Исходный код опубликован на GitHub. VCam — независимая альтернатива iVcam, не связанная с его разработчиком.'],
  ['Нужно устанавливать приложение на телефон?','Нет. Установи VCam на компьютер с Windows. На iPhone открой ссылку из QR-кода в Safari, на Android — в Chrome. Разреши браузеру использовать камеру.'],
@@ -37,7 +38,7 @@ export default function SiteHome(){
    <p className="hero-description">Используй iPhone или Android как веб-камеру в Zoom, OBS и других программах. На телефоне достаточно открыть ссылку.</p>
    <div className="hero-terms"><span><Check size={16}/>Бесплатно</span><span><Check size={16}/>Без рекламы</span><span><Check size={16}/>Без водяного знака</span></div>
    <div className="hero-actions" id="download"><DownloadActions/></div>
-   <div className="hero-meta"><span>Windows 10 / 11 · v{VERSION} beta</span><HelpButton label/></div>
+   <div className="hero-meta"><DownloadCount/><HelpButton label/></div>
    <figure className="hero-image"><img src="/images/vcam-office.webp" width="1672" height="941" fetchPriority="high" alt="Телефон на подставке снимает человека за ноутбуком; его изображение открыто в VCam"/><figcaption className="hero-specs"><div><strong><small>до</small> 4K</strong><span>Разрешение видео</span></div><div><strong><small>до</small> 60 <small>кадров/с</small></strong><span>Частота кадров</span></div><div><Wifi size={25}/><span>Передача по Wi-Fi</span></div></figcaption></figure>
    <p className="quality-footnote">Разрешение и частота кадров зависят от устройства и браузера. VCam показывает доступные режимы.</p>
   </section>
