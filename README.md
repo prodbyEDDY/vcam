@@ -16,6 +16,8 @@ VCam создаёт виртуальную камеру Windows из видео�
 
 **Free iVcam alternative for Windows:** use your iPhone or Android phone as a wireless webcam through its browser. No phone app, ads, subscription or watermark. This is an independent project, not affiliated with iVcam.
 
+[English documentation](README.en.md) · [English website](https://vcam.prodbyeddy.chatgpt.site/en)
+
 ## Как подключиться
 
 1. **Установи VCam на Windows.** Скачай установщик по кнопке выше. После установки открой VCam с рабочего стола или из меню «Пуск».
@@ -24,6 +26,8 @@ VCam создаёт виртуальную камеру Windows из видео�
 4. **Выбери VCam в настройках камеры OBS, Zoom или другой программы.** Страница на телефоне должна оставаться открытой, экран — разблокированным.
 
 QR-код и ручной код одноразовые, действуют десять минут. После считывания подключение начинается автоматически. Если программа не видит новую камеру, перезапусти её после установки VCam.
+
+В VCam 0.2.3 доступен выбор русского и английского языка в настройках. При первом запуске учитывается язык Windows; ручной выбор сохраняется.
 
 ## Интерфейс
 

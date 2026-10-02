@@ -28,7 +28,7 @@ for(const slug of slugs){
 }
 for(const route of linkSet){const r=await fetch(base+route);assert.equal(r.status,200,'Internal link '+route);}
 const missing=await fetch(base+'/blog/article-does-not-exist');assert.equal(missing.status,404,'Unknown article must be 404');
-const sitemap=await fetch(base+'/sitemap.xml');assert.equal(sitemap.status,200);const xml=await sitemap.text();assert.equal((xml.match(/<loc>/g)||[]).length,12);for(const slug of slugs)assert.ok(xml.includes(canonical+'/blog/'+slug));
+const sitemap=await fetch(base+'/sitemap.xml');assert.equal(sitemap.status,200);const xml=await sitemap.text();assert.equal((xml.match(/<loc>/g)||[]).length,22);for(const slug of slugs)assert.ok(xml.includes(canonical+'/blog/'+slug));
 const home=await (await fetch(base+'/')).text();assert.ok(home.includes('href="/blog"'));
 const robots=await (await fetch(base+'/robots.txt')).text();assert.ok(robots.includes('Sitemap: '+canonical+'/sitemap.xml'));assert.ok(!robots.includes('Disallow: /blog'));
-console.log('PASS all internal links, sitemap (12 pages), robots, landing link and 404');
+console.log('PASS all internal links, sitemap (22 pages), robots, landing link and 404');
