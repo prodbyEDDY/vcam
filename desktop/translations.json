@@ -68,7 +68,7 @@
   "Выбери VCam в приложении для звонков": "Select VCam in your video call application",
   "Установи VCam Setup для активации камеры": "Install VCam Setup to activate the virtual camera",
   "Скачать для Windows": "Download for Windows",
-  "Автообновления: проверка каждый час": "Automatic updates: checked hourly",
+  "Автообновления: проверка раз в сутки": "Automatic updates: checked daily",
   "Связаться с разработчиком": "Contact the developer",
   "Камера приостановлена": "Camera paused",
   "Нужен QR-код из приложения VCam": "Use the QR code from the VCam Windows app",
@@ -156,7 +156,7 @@
   "Некорректные параметры подключения.": "Invalid connection parameters.",
   "Автообновления доступны в установленном приложении": "Automatic updates are available in the installed app",
   "Проверка обновлений…": "Checking for updates…",
-  "Установлена последняя версия · проверка каждый час": "You have the latest version · checked hourly",
-  "Не удалось проверить обновление. Следующая попытка через час.": "Could not check for updates. Retrying in one hour.",
-  "Обновление недоступно. Следующая попытка через час.": "Update unavailable. Retrying in one hour."
+  "Установлена последняя версия · проверка раз в сутки": "You have the latest version · checked daily",
+  "Не удалось проверить обновление. Следующая попытка через сутки.": "Could not check for updates. Retrying in 24 hours.",
+  "Обновление недоступно. Следующая попытка через сутки.": "Update unavailable. Retrying in 24 hours."
 }

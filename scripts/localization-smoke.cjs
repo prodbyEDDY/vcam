@@ -11,7 +11,7 @@ async function wait(fn,label){for(let i=0;i<100;i++){if(await fn())return;await 
 app.whenReady().then(async()=>{let window;try{
  await wait(()=>BrowserWindow.getAllWindows().length,'window');window=BrowserWindow.getAllWindows()[0];const evaluate=code=>window.webContents.executeJavaScript(code);
  await wait(()=>evaluate(`document.querySelector('.primary-button')?.textContent.includes('Show QR code')`),'English camera UI');
- if(!await evaluate(`window.vcam.version==='0.2.3'&&window.vcam.locale==='en'&&document.documentElement.lang==='en'`))throw Error('Incorrect native language or version');
+ if(!await evaluate(`window.vcam.version==='0.2.4'&&window.vcam.locale==='en'&&document.documentElement.lang==='en'`))throw Error('Incorrect native language or version');
  await evaluate(`document.querySelector('[aria-label="Settings"]').click()`);
  await wait(()=>evaluate(`!!document.querySelector('#vcam-language')`),'language setting');
  if(!await evaluate(`document.querySelector('.settings-body').textContent.includes('Auto rotate')`))throw Error('English settings missing');
