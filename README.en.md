@@ -25,7 +25,7 @@ QR codes and typed codes are single-use and expire after ten minutes. Restart a 
 - Confirmed camera modes, including up to 4K and 60 FPS where supported. 4K60 is not guaranteed.
 - Receiver controls for zoom, rotation, mirroring, composition grid and pause. Focus, exposure and torch depend on browser capabilities.
 - The Windows receiver can keep streaming while minimized.
-- Automatic updates in installed VCam 0.2.1 and newer: startup and hourly checks, background download, installation after closing the app.
+- Automatic updates in installed VCam 0.2.1 and newer: daily checks in 0.2.4 and newer, with the last check saved across restarts, background download, installation after closing the app.
 - English and Russian UI in 0.2.3: system-language default and a saved language choice in **Settings → Language**.
 
 ## Current beta limitations

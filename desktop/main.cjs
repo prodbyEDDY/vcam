@@ -55,7 +55,7 @@ if(!app.requestSingleInstanceLock()){app.quit()}else{
   win.webContents.setWindowOpenHandler(({url})=>{try{const u=new URL(url);if(u.protocol==='https:'&&(u.hostname==='prodbyeddy.com'||u.hostname==='github.com'&&u.pathname.startsWith('/prodbyEDDY/vcam')))void shell.openExternal(url)}catch{}return {action:'deny'}});
   win.webContents.on('will-navigate',(e,url)=>{if(!url.startsWith(pathToFileURL(ui).href))e.preventDefault()});
   win.loadFile(ui);win.on('closed',()=>{win=null});
-  if(app.isPackaged){const {autoUpdater}=require('electron-updater');updates=require('./updates.cjs').startUpdates({updater:autoUpdater,enabled:true})}
+  if(app.isPackaged){const {autoUpdater}=require('electron-updater');updates=require('./updates.cjs').startUpdates({updater:autoUpdater,enabled:true,checkStatePath:path.join(app.getPath('userData'),'update-check.json')})}
  });
  app.on('window-all-closed',()=>app.quit());
  app.on('before-quit',()=>{updates?.stop();bridge?.stdin.end();bridge?.kill()});

@@ -11,7 +11,7 @@ test('Windows language preference survives restart and handles a damaged prefere
  try{assert.equal(readPreferredLocale(file,'ru-RU'),'ru');assert.equal(readPreferredLocale(file,'en-US'),'en');assert.equal(normalizeLocale('de-DE'),'en');savePreferredLocale(file,'en');assert.equal(readPreferredLocale(file,'ru-RU'),'en');savePreferredLocale(file,'ru');assert.equal(readPreferredLocale(file,'en-US'),'ru');fs.writeFileSync(file,'broken');assert.equal(readPreferredLocale(file,'en-GB'),'en');assert.throws(()=>savePreferredLocale(file,'bad'));}finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
 test('native camera errors and updater messages have English translations',()=>{
- for(const s of ['Ошибка передачи кадров в виртуальную камеру.','Не найден модуль виртуальной камеры. Переустанови VCam.','Автообновления: проверка каждый час','Установлена последняя версия · проверка каждый час','Загрузка версии 0.2.3…','Обновление загружается: 42%','Версия 0.2.3 установится после закрытия VCam','Обновление недоступно. Следующая попытка через час.']){assert.doesNotMatch(text(s,'en'),/[А-Яа-яЁё]/);assert.equal(text(s,'ru'),s)}
+ for(const s of ['Ошибка передачи кадров в виртуальную камеру.','Не найден модуль виртуальной камеры. Переустанови VCam.','Автообновления: проверка раз в сутки','Установлена последняя версия · проверка раз в сутки','Загрузка версии 0.2.3…','Обновление загружается: 42%','Версия 0.2.3 установится после закрытия VCam','Обновление недоступно. Следующая попытка через сутки.']){assert.doesNotMatch(text(s,'en'),/[А-Яа-яЁё]/);assert.equal(text(s,'ru'),s)}
 });
 test('camera, scanner, permission and pairing messages are covered by the English catalog',()=>{
  const ts=require('../web/node_modules/typescript');
