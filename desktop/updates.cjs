@@ -1,10 +1,11 @@
+const {text}=require('./localization.cjs');
 const HOUR = 60 * 60 * 1000;
 
 // Only the installed application checks GitHub. No renderer-supplied URLs.
 function startUpdates({updater, enabled, setTimeoutFn = setTimeout, setIntervalFn = setInterval, clearTimeoutFn = clearTimeout, clearIntervalFn = clearInterval}) {
  let message = 'Автообновления: проверка каждый час';
  let busy = false, downloaded = false, stopped = false;
- if (!enabled) return {status: () => 'Автообновления доступны в установленном приложении', stop() {}};
+ if (!enabled) return {status: (locale='ru') => text('Автообновления доступны в установленном приложении',locale), stop() {}};
  updater.autoDownload = true;
  updater.autoInstallOnAppQuit = true;
  updater.autoRunAppAfterInstall = false;
@@ -33,6 +34,6 @@ function startUpdates({updater, enabled, setTimeoutFn = setTimeout, setIntervalF
  const initial = setTimeoutFn(() => { void check(); }, 15000);
  const hourly = setIntervalFn(() => { void check(); }, HOUR);
  initial.unref?.(); hourly.unref?.();
- return {status: () => message, stop() { stopped = true; clearTimeoutFn(initial); clearIntervalFn(hourly); }};
+ return {status: (locale='ru') => text(message,locale), stop() { stopped = true; clearTimeoutFn(initial); clearIntervalFn(hourly); }};
 }
 module.exports = {startUpdates, HOUR};

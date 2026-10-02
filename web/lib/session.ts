@@ -2,12 +2,12 @@ import { CameraInfo, gather, inspectCamera, probeModes, setMode, sleep } from '.
 export type SessionState = 'idle'|'opening'|'pairing'|'connecting'|'live'|'paused'|'error';
 export type Room={id:string;hostToken?:string;phoneToken?:string;pairToken?:string;code?:string;expires?:number};
 export const EMPTY_INFO:CameraInfo={settings:{},capabilities:{},devices:[],modes:[]};
-declare global { interface Window { vcam?: {site:string;version:string;api:(path:string,options:any)=>Promise<any>;frame:(w:number,h:number,data:ArrayBuffer)=>Promise<boolean>;status:()=>Promise<{installed:boolean;consumer:boolean;error?:string;update?:string}>} } }
+declare global { interface Window { vcam?: {site:string;version:string;locale?:'ru'|'en';setLocale?:(locale:'ru'|'en')=>Promise<void>;api:(path:string,options:any)=>Promise<any>;frame:(w:number,h:number,data:ArrayBuffer)=>Promise<boolean>;status:()=>Promise<{installed:boolean;consumer:boolean;error?:string;update?:string}>} } }
 export const friendly=(e:any)=>e?.name==='NotAllowedError'?'Разреши доступ к камере в настройках Safari.':e?.name==='OverconstrainedError'?'Этот режим недоступен для выбранной камеры.':e?.name==='NotReadableError'?'Камера занята другим приложением.':e?.message||'Не удалось подключиться. Попробуй ещё раз.';
 type Events={state:(s:SessionState)=>void;note:(s:string)=>void;error:(s:string)=>void;info:(i:CameraInfo)=>void;link:(s:string)=>void;code?:(s:string)=>void;stream:(s:MediaStream|null)=>void;busy:(b:boolean)=>void;orientation:(a:number)=>void};
 export class CameraSession {
   peer:RTCPeerConnection|null=null; channel:RTCDataChannel|null=null; stream:MediaStream|null=null;
-  room:Room|null=null;pair:{id:string;token:string}|{code:string}|null=null; epoch=0;info=EMPTY_INFO;phone=false;wake:any=null;
+  room:Room|null=null;pair:{id:string;token:string}|{code:string}|null=null; epoch=0;info=EMPTY_INFO;phone=false;locale:'ru'|'en'='ru';wake:any=null;
   private queue=Promise.resolve(); private pending=new Map<string,{resolve:()=>void;reject:(e:any)=>void;timer:any}>();
   constructor(private events:Events){}
   async api(path:string,options:any={}) {
@@ -71,7 +71,7 @@ export class CameraSession {
       p.ontrack=e=>{if(this.epoch===epoch){this.stream=e.streams[0]||new MediaStream([e.track]);this.events.stream(this.stream)}};
       await p.setLocalDescription(await p.createOffer());await gather(p);if(this.epoch!==epoch)return;
       await this.api(this.path(r,'host'),{method:'POST',headers:this.auth(r,'host'),body:JSON.stringify(p.localDescription)});
-      this.events.link(`${window.vcam.site}/connect#room=${r.id}&key=${r.pairToken}`);this.events.code?.(r.code||'');this.events.state('pairing');this.events.note('');
+      this.events.link(`${window.vcam.site}${this.locale==='en'?'/en/connect':'/connect'}#room=${r.id}&key=${r.pairToken}`);this.events.code?.(r.code||'');this.events.state('pairing');this.events.note('');
       if(await this.poll(p,r,'host',epoch)){this.events.link('');this.events.code?.('');this.events.state('connecting');this.events.note('Подключаем видеопоток…');this.timeout(p,epoch)}
     }catch(e){if(this.epoch===epoch)this.fail(e)}
   }

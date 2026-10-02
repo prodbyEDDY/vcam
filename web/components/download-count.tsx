@@ -3,6 +3,9 @@
 import {useEffect, useState} from 'react';
 import {ArrowUpRight, Download} from 'lucide-react';
 import {GITHUB} from '@/lib/product';
+import {fetchDisplayedDownloadCount} from '@/lib/download-count-client.mjs';
+import {FRESH_MS} from '@/lib/download-stats.mjs';
+import baseline from '@/lib/download-baseline.json';
 
 function downloadWord(count: number) {
   const lastTwo = count % 100;
@@ -11,22 +14,27 @@ function downloadWord(count: number) {
   return last === 1 ? 'скачивание' : last >= 2 && last <= 4 ? 'скачивания' : 'скачиваний';
 }
 
-export function DownloadCount() {
-  const [count, setCount] = useState<number | null>(null);
+export function DownloadCount({locale='ru'}:{locale?:'ru'|'en'}) {
+ const en=locale==='en';
+  const [count, setCount] = useState<number>(baseline.count);
   useEffect(() => {
     const controller = new AbortController();
+    let pending = false;
+    let nextUpdate = 0;
     async function update() {
-      if (document.hidden) return;
+      if (document.hidden || pending || Date.now() < nextUpdate) return;
+      pending = true;
       try {
-        const response = await fetch('/api/downloads', {signal: controller.signal});
-        if (!response.ok) return;
-        const data = await response.json();
-        if (data && typeof data === 'object' && 'count' in data && typeof data.count === 'number' &&
-            Number.isSafeInteger(data.count) && data.count >= 0) setCount(data.count);
-      } catch { /* Keep the last verified count, or the neutral GitHub link. */ }
+        const verifiedCount = await fetchDisplayedDownloadCount(fetch, controller.signal);
+        if (!controller.signal.aborted) setCount(verifiedCount);
+        nextUpdate = Date.now() + FRESH_MS;
+      } catch {
+        // Preserve the last verified number; try again at the daily refresh.
+        nextUpdate = Date.now() + FRESH_MS;
+      } finally { pending = false; }
     }
     void update();
-    const timer = window.setInterval(update, 15 * 60 * 1000);
+    const timer = window.setInterval(update, FRESH_MS);
     document.addEventListener('visibilitychange', update);
     return () => {
       controller.abort();
@@ -36,10 +44,10 @@ export function DownloadCount() {
   }, []);
 
   return <a className="download-count" href={`${GITHUB}/releases`} target="_blank" rel="noreferrer"
-    title="Скачивания установщиков Windows во всех публичных релизах GitHub. Обновляется каждые 15 минут; повторные скачивания тоже учитываются.">
+    title={en?"Windows installer downloads across public GitHub releases, including repeat downloads. Refreshed daily; the last verified count remains if an update fails.":"Скачивания установщиков Windows во всех публичных релизах GitHub. Обновляется раз в сутки. При ошибке остаётся последнее полученное число; повторные скачивания тоже учитываются."}>
     <Download size={17} aria-hidden="true"/>
     <span className="download-count-text" aria-live="polite" aria-atomic="true">
-      {count === null ? 'Скачивания на GitHub' : <><strong>{new Intl.NumberFormat('ru-RU').format(count)}</strong> {downloadWord(count)}</>}
+      <strong>{new Intl.NumberFormat(en?'en-US':'ru-RU').format(count)}</strong> {en?(count===1?'download':'downloads'):downloadWord(count)}
     </span>
     <ArrowUpRight size={14} aria-hidden="true"/>
   </a>;

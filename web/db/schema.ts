@@ -9,3 +9,7 @@ export const signals = sqliteTable('signals', {
   id:integer('id').primaryKey({autoIncrement:true}), room:text('room').notNull(), sender:text('sender').notNull(), payload:text('payload').notNull()
 }, t => [uniqueIndex('signals_room_sender').on(t.room,t.sender)]);
 export const limits = sqliteTable('limits', {key:text('key').primaryKey(), count:integer('count').notNull(), expires:integer('expires').notNull()}, t => [index('limits_expiry').on(t.expires)]);
+export const downloadSnapshots = sqliteTable('download_snapshots', {
+  id: text('id').primaryKey(), count: integer('count').notNull(),
+  checkedAt: integer('checked_at').notNull(), retryAfter: integer('retry_after').notNull(),
+});

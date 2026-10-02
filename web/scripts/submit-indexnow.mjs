@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const site='https://vcam.prodbyeddy.chatgpt.site';
+const {key}=JSON.parse(fs.readFileSync(new URL('../lib/indexnow.json',import.meta.url),'utf8'));
+const keyLocation=`${site}/${key}.txt`;
+const proof=await fetch(keyLocation,{signal:AbortSignal.timeout(20000)});
+if(!proof.ok||(await proof.text()).trim()!==key)throw Error('Published IndexNow key is not available; publish the matching source first.');
+const sitemap=await fetch(site+'/sitemap.xml',{signal:AbortSignal.timeout(20000)});
+if(!sitemap.ok)throw Error('Sitemap unavailable');
+const urls=[...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+if(!urls.length||urls.some(u=>new URL(u).origin!==site))throw Error('Invalid sitemap URLs');
+const response=await fetch('https://api.indexnow.org/indexnow',{method:'POST',headers:{'Content-Type':'application/json; charset=utf-8'},body:JSON.stringify({host:new URL(site).hostname,key,keyLocation,urlList:urls}),signal:AbortSignal.timeout(30000)});
+if(response.status!==200&&response.status!==202)throw Error(`IndexNow returned ${response.status}: ${await response.text()}`);
+console.log(JSON.stringify({status:response.status,submitted:urls.length,message:response.status===202?'Received; key validation pending':'Received by IndexNow. Indexing is not guaranteed.'}));

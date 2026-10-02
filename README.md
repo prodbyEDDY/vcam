@@ -4,10 +4,10 @@
   <p><strong>Камера iPhone или Android для Windows</strong></p>
   <p>Бесплатная альтернатива iVcam. Без рекламы, подписки и водяного знака.<br>Приложение нужно только на компьютере. На телефоне — браузер.</p>
   <p>
-    <a href="https://github.com/prodbyEDDY/vcam/releases/download/v0.2.2/VCam-Setup-0.2.2-x64.exe"><img alt="Скачать VCam 0.2.2 для Windows" src="https://img.shields.io/badge/Windows-Скачать_v0.2.2-B9A0FF?style=for-the-badge&labelColor=242329" /></a>
+    <a href="https://github.com/prodbyEDDY/vcam/releases/download/v0.2.3/VCam-Setup-0.2.3-x64.exe"><img alt="Скачать VCam 0.2.3 для Windows" src="https://img.shields.io/badge/Windows-Скачать_v0.2.3-B9A0FF?style=for-the-badge&labelColor=242329" /></a>
     <a href="https://vcam.prodbyeddy.chatgpt.site"><img alt="Сайт VCam" src="https://img.shields.io/badge/VCam-Открыть_сайт-EEE6FF?style=for-the-badge&labelColor=242329" /></a>
   </p>
-  <p><a href="https://github.com/prodbyEDDY/vcam/releases/tag/v0.2.2">Что нового в 0.2.2</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/connect">Сканировать QR / ввести код</a> · <a href="https://prodbyeddy.com">Связаться с разработчиком</a></p>
+  <p><a href="https://github.com/prodbyEDDY/vcam/releases/tag/v0.2.3">Что нового в 0.2.3</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/connect">Сканировать QR / ввести код</a> · <a href="https://prodbyeddy.com">Связаться с разработчиком</a></p>
 </div>
 
 ![Мокап VCam: телефон заменяет веб-камеру, видеопоток открыт на ноутбуке](web/public/images/vcam-office.webp)
@@ -15,6 +15,8 @@
 VCam создаёт виртуальную камеру Windows из видеопотока телефона. Её можно выбрать в OBS, Zoom и других программах с поддержкой DirectShow. Телефон подключается через Safari или Chrome по QR-коду либо короткому коду. Видео передаётся напрямую между устройствами по WebRTC.
 
 **Free iVcam alternative for Windows:** use your iPhone or Android phone as a wireless webcam through its browser. No phone app, ads, subscription or watermark. This is an independent project, not affiliated with iVcam.
+
+[English documentation](README.en.md) · [English website](https://vcam.prodbyeddy.chatgpt.site/en)
 
 ## Как подключиться
 
@@ -24,6 +26,8 @@ VCam создаёт виртуальную камеру Windows из видео�
 4. **Выбери VCam в настройках камеры OBS, Zoom или другой программы.** Страница на телефоне должна оставаться открытой, экран — разблокированным.
 
 QR-код и ручной код одноразовые, действуют десять минут. После считывания подключение начинается автоматически. Если программа не видит новую камеру, перезапусти её после установки VCam.
+
+В VCam 0.2.3 доступен выбор русского и английского языка в настройках. При первом запуске учитывается язык Windows; ручной выбор сохраняется.
 
 ## Интерфейс
 
@@ -79,12 +83,12 @@ flowchart LR
 - **Фоновая работа:** Windows-приложение сворачивать можно. На телефоне держи страницу открытой и экран разблокированным.
 - **Звук:** пока не передаётся. Используй отдельный микрофон или микрофон компьютера.
 - **Установщик:** пока без сертификата издателя, поэтому Windows может показать предупреждение. Загружай установку только из [официальных релизов](https://github.com/prodbyEDDY/vcam/releases).
-- **Обновление с 0.2.0 и ниже:** установи 0.2.2 вручную один раз. В старых версиях нет механизма автоматического обновления. Следующие версии будут загружаться автоматически; Windows может запросить права администратора для установки.
+- **Обновление с 0.2.0 и ниже:** установи 0.2.3 вручную один раз. В старых версиях нет механизма автоматического обновления. Следующие версии будут загружаться автоматически; Windows может запросить права администратора для установки.
 
 ## Разработка и документация
 
 - [Сборка на Windows, архитектура и проверки](docs/DEVELOPMENT.md)
-- [Изменения текущего выпуска](docs/releases/0.2.2.md) · [Возможности и ограничения](docs/RELEASE.md)
+- [Изменения текущего выпуска](docs/releases/0.2.3.md) · [Возможности и ограничения](docs/RELEASE.md)
 - [Блог: инструкции и сравнения](https://vcam.prodbyeddy.chatgpt.site/blog)
 - [SEO: структура блога и дальнейшая индексация](docs/SEO.md)
 - [Нагрузка на сервер](docs/HOSTING.md)

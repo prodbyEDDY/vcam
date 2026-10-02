@@ -39,3 +39,5 @@ html,body{margin:0;background:#000;color:#fff;min-height:100%;font-family:var(--
   .connect-label{margin:8px 0 0;font-size:13px}.text-button{padding:5px}
   .frame-actions{top:8px;right:8px}.lens-strip{bottom:8px}
 }
+
+.language-select{width:100%;padding:12px 14px;border:1px solid #ffffff24;background:#24232a;color:#eee;border-radius:10px;font:inherit}

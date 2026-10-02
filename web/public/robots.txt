@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /connect
+# Connection pages are crawlable so bots can read their noindex metadata.
+# Public pages are available to search crawlers, including OAI-SearchBot and Claude-SearchBot.
 Sitemap: https://vcam.prodbyeddy.chatgpt.site/sitemap.xml
