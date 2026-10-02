@@ -3,6 +3,7 @@
   "version": "0.2.4",
   "description": "Free iPhone and Android webcam for Windows — English and Russian",
   "author": "prodbyEDDY",
+  "license": "MIT",
   "private": true,
   "main": "desktop/main.cjs",
   "scripts": {
@@ -28,6 +29,10 @@
       "package.json"
     ],
     "extraResources": [
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      },
       {
         "from": "native/bin",
         "to": "native",

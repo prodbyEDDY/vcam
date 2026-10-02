@@ -1,5 +1,9 @@
 # VCam generated asset manifest
 
+## October 2026 launch artwork
+
+Six standalone light-background campaign images are in [media/README.md](media/README.md). Exact prompts and filenames are recorded in [media/prompts.json](media/prompts.json). Mode: built-in image_gen, one generation per asset, no reference images. All six outputs were visually reviewed. These are conceptual promotional illustrations; they do not depict the actual application interface. Actual screenshots are kept separately in `docs/screenshots/`.
+
 ## Shipped assets
 
 - Meadow mockup: `web/public/images/vcam-meadow.webp`.

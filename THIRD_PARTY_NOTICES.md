@@ -1,5 +1,7 @@
 # Third-party notices
 
+VCam's original code and documentation are licensed under the [MIT License](LICENSE), copyright (c) 2026 prodbyEDDY. Third-party components, fonts and marks retain their own licenses and notices described below.
+
 VCam's DirectShow camera is based on UnityCapture by Bernhard Schelling and UnityCam by MHD Yamen Saraiji.
 Source: https://github.com/schellingb/UnityCapture at commit 3ed54c325e0ad71afcf4f246c07e5e17b3d7f2d2.
 The filter and its source files are distributed under the MIT license included in native/UnityCaptureFilter.cpp. Original copyright notices are retained. The DirectShow base classes retain Microsoft notices in streams.cpp and streams.h.

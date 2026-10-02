@@ -1,50 +1,78 @@
 <div align="center">
-  <img src="web/public/brand/icon-192.png" width="88" height="88" alt="VCam" />
-  <h1>VCam</h1>
-  <p><strong>Free iPhone and Android webcam for Windows</strong></p>
-  <p>No phone app, ads, subscription or watermark.</p>
-  <p><a href="https://vcam.prodbyeddy.chatgpt.site/en">Website</a> · <a href="https://github.com/prodbyEDDY/vcam/releases">Windows releases</a> · <a href="README.md">Русский</a></p>
+  <img src="web/public/brand/icon-192.png" width="80" height="80" alt="VCam logo" />
+  <h1>VCam — your phone, your webcam</h1>
+  <p><strong>iPhone or Android → Windows → OBS, Zoom and other camera apps.</strong></p>
+  <p>Free and open source. MIT licensed. No ads, subscriptions or watermarks.<br>Install VCam on Windows. Use a browser on your phone.</p>
+  <p>
+    <a href="https://github.com/prodbyEDDY/vcam/releases/download/v0.2.4/VCam-Setup-0.2.4-x64.exe"><img alt="Download VCam 0.2.4 for Windows" src="https://img.shields.io/badge/Windows-Download_v0.2.4-B9A0FF?style=for-the-badge&amp;labelColor=242329" /></a>
+    <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/License-MIT-EEE6FF?style=for-the-badge&amp;labelColor=242329" /></a>
+  </p>
+  <p><a href="README.md">Русский</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/en">Website</a> · <a href="https://github.com/prodbyEDDY/vcam/releases">All releases</a> · <a href="https://vcam.prodbyeddy.chatgpt.site/en/connect">Connect phone</a></p>
 </div>
 
-VCam creates a Windows DirectShow virtual camera from your phone's browser video. Install the receiver on Windows, connect your iPhone through Safari or Android phone through Chrome, and select VCam in OBS, Zoom or another compatible application. Video travels directly between the devices over encrypted WebRTC. The server serves the website and helps pair them; it does not record or store the video.
+## What VCam does
 
-## Set up a phone webcam
+- **Turns your phone into a Windows webcam.** Select VCam in OBS, Zoom and other apps that support DirectShow cameras.
+- **Connects over Wi-Fi.** Scan a QR code or enter a short code. No phone app to install.
+- **Puts camera controls on your computer.** Switch available cameras, zoom, rotate, mirror, show a composition grid or pause the video.
+- **Supports up to 4K and 60 FPS on compatible devices.** VCam offers modes confirmed by the camera. Focus, exposure and torch controls depend on the browser. 4K60 is not guaranteed.
+- **Sends encrypted video directly between devices.** WebRTC carries the stream from phone to computer. The server helps pair them; it does not receive or store your video.
+- **Speaks English and Russian.** Choose your language in Settings. The receiver keeps streaming when minimized.
+- **Checks for updates once a day.** Updates download in the background and install after you close VCam. The check time is saved across restarts.
 
-1. Install VCam on 64-bit Windows 10 or Windows 11. Administrator permission is needed to register the camera.
-2. Connect the computer and phone to the same local Wi-Fi network without device isolation. Internet is needed to open the site and pair.
-3. Open VCam and click **Show QR code**. Scan with the phone camera and open the link in Safari or Chrome, or enter the eight-character code at [Connect phone](https://vcam.prodbyeddy.chatgpt.site/en/connect).
-4. Allow camera access. Keep the phone page open and screen unlocked.
-5. Select **VCam** in the destination application's camera settings. Choose a separate microphone for audio.
+## Screenshots
 
-QR codes and typed codes are single-use and expire after ten minutes. Restart a camera application after installation if it does not list the new virtual camera.
+**Windows:** the receiver before a phone connects. **Show QR code** creates a one-time pairing code.
 
-## Features
+![Actual VCam Windows interface in English, with the Show QR code button](docs/screenshots/windows-english.png)
 
-- Free access to all implemented features, with no ads, watermark, subscription or software time limit.
-- Switch among the cameras and lenses exposed by the phone browser.
-- Confirmed camera modes, including up to 4K and 60 FPS where supported. 4K60 is not guaranteed.
-- Receiver controls for zoom, rotation, mirroring, composition grid and pause. Focus, exposure and torch depend on browser capabilities.
-- The Windows receiver can keep streaming while minimized.
-- Automatic updates in installed VCam 0.2.1 and newer: daily checks in 0.2.4 and newer, with the last check saved across restarts, background download, installation after closing the app.
-- English and Russian UI in 0.2.3: system-language default and a saved language choice in **Settings → Language**.
+<details>
+<summary>Phone: QR scanner and manual code entry</summary>
 
-## Current beta limitations
+<p align="center"><img src="docs/screenshots/phone.jpg" width="320" alt="VCam phone browser page with QR scanner and eight-character pairing code input" /></p>
 
-Windows receiver only; no macOS/Linux receiver, dedicated USB mode, phone microphone audio or TURN relay. Camera settings depend on the phone and browser. Compatibility with every device and application has not been tested. The beta installer is not yet signed with a publisher certificate; download only from the official repository's Releases page.
+Actual phone interface in Russian, shown with a test camera image in the scanner.
 
-VCam is an independent project and is not affiliated with iVcam, DroidCam, Camo or Elgato. Source is published here; third-party component notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+</details>
 
-## Guides and support
+## Set up in four steps
 
-- [iPhone webcam on Windows](https://vcam.prodbyeddy.chatgpt.site/en/guides/iphone-webcam-windows)
-- [Android webcam on Windows](https://vcam.prodbyeddy.chatgpt.site/en/guides/android-webcam-windows)
-- [Phone camera in OBS](https://vcam.prodbyeddy.chatgpt.site/en/guides/phone-camera-obs)
-- [Wi-Fi troubleshooting](https://vcam.prodbyeddy.chatgpt.site/en/guides/wifi-webcam-troubleshooting)
-- [Product and privacy details](https://vcam.prodbyeddy.chatgpt.site/en/about)
-- [Report an issue](https://github.com/prodbyEDDY/vcam/issues) · [Developer: EDDY](https://prodbyeddy.com)
+1. **Install VCam** on 64-bit Windows 10 or 11. Administrator permission is needed to register the virtual camera.
+2. **Put your computer and phone on the same Wi-Fi network.** Open VCam and click **Show QR code**.
+3. **Scan the QR code with your phone.** Open the link in Safari on iPhone or Chrome on Android and allow camera access. You can also enter the eight-character code on the [connection page](https://vcam.prodbyeddy.chatgpt.site/en/connect).
+4. **Select VCam** in your camera application's settings. Keep the phone page open and the screen unlocked.
 
-Include device model and software versions in an issue. Do not post an active QR code or connection token.
+Pairing codes are single-use and expire after ten minutes. Restart a camera application if it does not list VCam after installation.
 
-## Development
+## Before you start
 
-See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for the Windows build toolchain, Electron receiver, shared React camera interface and DirectShow components. Run `npm test`, `npm run build:ui`, and `npm run dist` for the application. `scripts/localization-smoke.cjs` checks the native interface with an isolated profile and no production pairing or real camera. Website checks are `web/scripts/check-blog.mjs` and `web/scripts/check-seo.mjs` against a running preview.
+- **Video only.** Use a separate microphone or your computer's microphone for audio.
+- **Local network required.** Devices must be able to reach each other. Internet is needed for the website and pairing. No dedicated USB mode or TURN relay yet.
+- **Windows receiver.** No macOS or Linux receiver yet. Available lenses and video quality depend on the phone, browser and network.
+- **Currently in beta.** Not every device and application has been tested. The installer is not yet signed with a publisher certificate; download it from the [official releases](https://github.com/prodbyEDDY/vcam/releases).
+- **Upgrading from 0.2.0 or earlier?** Install the current version manually once. Automatic updates are available from 0.2.1, with daily checks from 0.2.4.
+
+## Open source
+
+VCam is [MIT licensed](LICENSE). Use, inspect, modify and redistribute the code, including in commercial projects, while retaining the license and copyright notice. Third-party components keep their own licenses listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+[Build from source](docs/DEVELOPMENT.md) · [Architecture and hosting](docs/HOSTING.md) · [0.2.4 changes](docs/releases/0.2.4.md)
+
+## Help and media
+
+[iPhone setup](https://vcam.prodbyeddy.chatgpt.site/en/guides/iphone-webcam-windows) · [Android setup](https://vcam.prodbyeddy.chatgpt.site/en/guides/android-webcam-windows) · [OBS setup](https://vcam.prodbyeddy.chatgpt.site/en/guides/phone-camera-obs) · [Wi-Fi troubleshooting](https://vcam.prodbyeddy.chatgpt.site/en/guides/wifi-webcam-troubleshooting)
+
+[Report an issue](https://github.com/prodbyEDDY/vcam/issues) · [Developer: EDDY](https://prodbyeddy.com)
+
+Include your VCam version, phone model, browser and Windows version in bug reports. Do not post an active QR code or pairing token.
+
+<details>
+<summary>VCam covers and promotional artwork</summary>
+
+![VCam launch cover: Your phone. Your webcam. Free and open source.](docs/media/01-introducing-vcam.png)
+
+Generated illustration. Actual application screenshots are shown above. [All six covers](docs/media/README.md) · [Asset sources and prompts](docs/IMAGEGEN.md).
+
+</details>
+
+VCam is an independent, free iVcam alternative. It is not affiliated with iVcam, DroidCam, Camo or Elgato.
